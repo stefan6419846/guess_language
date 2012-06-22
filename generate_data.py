@@ -83,8 +83,11 @@ def build_blocks():
             if all(not chr(n).isalpha() for n in range(start, end)):
                 continue
 
-            start >>= BLOCK_RSHIFT
-            end >>= BLOCK_RSHIFT
+            shifted_start = start >> BLOCK_RSHIFT
+            shifted_end = end >> BLOCK_RSHIFT
+
+            assert shifted_start << BLOCK_RSHIFT == start
+            assert shifted_end << BLOCK_RSHIFT == end
 
             if name in FOLDED_NAMES:
                 comment = name
@@ -93,7 +96,7 @@ def build_blocks():
                 comment = None
 
             s = "BLOCKS[{:#x}:{:#x}] = [{!r}] * {:#x}{}\n".format(
-                start, end, name, end - start,
+                shifted_start, shifted_end, name, shifted_end - shifted_start,
                 "  # " + comment if comment else ""
             )
             f.write(s)
