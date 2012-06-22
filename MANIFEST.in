@@ -1,2 +1,0 @@
-recursive-include guess_language *.txt
-recursive-include guess_language/trigrams *
