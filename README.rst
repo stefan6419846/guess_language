@@ -20,7 +20,7 @@ Can’t guess if the text is too short.
 True
 
 
-But will try harder by checking against installed dictionaries
+But will try harder by checking against installed spelling dictionaries
 if PyEnchant is available.
 
 >>> guess_language("Hello, World!")
