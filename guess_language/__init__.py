@@ -85,7 +85,6 @@ SINGLETONS = [
 
 PT = ["pt_BR", "pt_PT"]
 
-#UNKNOWN = "UNKNOWN"
 UNKNOWN = None
 
 NAME_MAP = {
@@ -295,12 +294,8 @@ def guess_language(text: str):
     # if len(text) < MIN_LENGTH:
         # text = (text + " ") * (MIN_LENGTH // len(text))
 
-    tag = _identify(text, find_runs(text))
-
-    if tag is UNKNOWN:
-        tag = _identify_enchant(text)
-
-    return tag
+    # Assuming UNKNOWN evaluates to False.
+    return _identify(text, find_runs(text)) or _identify_by_spellchecking(text)
 
 
 def guess_language_info(text: str):
@@ -308,7 +303,7 @@ def guess_language_info(text: str):
     """
     tag = guess_language(text)
 
-    if tag == UNKNOWN:
+    if tag is UNKNOWN:
         return LanguageInfo(UNKNOWN, UNKNOWN, UNKNOWN)
 
     id = _get_id(tag) #@ReservedAssignment
@@ -497,29 +492,68 @@ def normalize(s):
 try:
     import enchant
 except ImportError:
-    def _identify_enchant(text, *args):
+    enchant = None
+
+    def _identify_by_spellchecking(*args):
         return UNKNOWN
 else:
-    from operator import itemgetter
+    import locale
 
-    def _identify_enchant(text, threshold=0.8, min_words=2, dictionaries={}):
-        words = re.findall("[\w'’]+", text, re.U)
+    def _identify_by_spellchecking(text, threshold=0.8, min_words=2,
+                                   dictionaries={}):
+        words = re.findall(r"[\w'’]+", text, re.U)
 
         if len(words) < min_words:
             return UNKNOWN
 
-        scores = {}
+        max_score = 0
+        max_tag = get_locale_language()
 
-        for tag in enchant.list_languages():
+        for tag in list_enchant_languages():
             try:
                 d = dictionaries[tag]
             except KeyError:
                 d = dictionaries[tag] = enchant.Dict(tag)
-            scores[tag] = sum([int(d.check(w)) for w in words])
+            score = sum([1 for w in words if d.check(w)])
+            if score > max_score:
+                max_score = score
+                max_tag = tag
 
-        tag, score = max(scores.items(), key=itemgetter(1))
-
-        if score / len(words) < threshold:
+        if max_score / len(words) < threshold:
             return UNKNOWN
 
-        return tag if tag in NAME_MAP else tag.split("_")[0]
+        return max_tag if max_tag in NAME_MAP else max_tag.split("_")[0]
+
+    def list_enchant_languages():
+        """Get ordered list of enchant languages.
+
+        locale_language, then en_US, then the rest.
+        """
+        global _enchant_languages
+
+        if "_enchant_languages" not in globals():
+            _enchant_languages = enchant.list_languages()
+
+            for language in ["en_US", get_locale_language()]:
+                for l in [language.split("_")[0], language]:
+                    try:
+                        index = _enchant_languages.index(l)
+                    except ValueError:
+                        pass
+                    else:
+                        _enchant_languages = (
+                            [l] +
+                            _enchant_languages[:index] +
+                            _enchant_languages[index+1:]
+                        )
+
+        return _enchant_languages
+
+    def get_locale_language():
+        """Get the language code for the current locale setting.
+        """
+        language = locale.getlocale()[0]
+        if not language:
+            locale.setlocale(locale.LC_ALL, "")
+            language = locale.getlocale()[0]
+        return language
