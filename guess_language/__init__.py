@@ -295,7 +295,12 @@ def guess_language(text: str):
     # if len(text) < MIN_LENGTH:
         # text = (text + " ") * (MIN_LENGTH // len(text))
 
-    return _identify(text, find_runs(text))
+    tag = _identify(text, find_runs(text))
+
+    if tag is UNKNOWN:
+        tag = _identify_enchant(text)
+
+    return tag
 
 
 def guess_language_info(text: str):
@@ -487,3 +492,34 @@ def normalize(s):
     s = "".join(c if c.isalpha() else "'" if c in "'’" else " " for c in s)
     s = CONSECUTIVE_SPACES_RE.sub(" ", s)
     return s
+
+
+try:
+    import enchant
+except ImportError:
+    def _identify_enchant(text, *args):
+        return UNKNOWN
+else:
+    from operator import itemgetter
+
+    def _identify_enchant(text, threshold=0.8, min_words=2, dictionaries={}):
+        words = re.findall("[\w'’]+", text, re.U)
+
+        if len(words) < min_words:
+            return UNKNOWN
+
+        scores = {}
+
+        for tag in enchant.list_languages():
+            try:
+                d = dictionaries[tag]
+            except KeyError:
+                d = dictionaries[tag] = enchant.Dict(tag)
+            scores[tag] = sum([int(d.check(w)) for w in words])
+
+        tag, score = max(scores.items(), key=itemgetter(1))
+
+        if score / len(words) < threshold:
+            return UNKNOWN
+
+        return tag if tag in NAME_MAP else tag.split("_")[0]

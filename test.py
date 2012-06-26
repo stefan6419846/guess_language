@@ -130,6 +130,7 @@ class GuessLanguageTest(unittest.TestCase):
              "トヨタ自動車(株)（以下、トヨタ）は、2007年９月よりフィリピンのルソン"
              "島北部に位置するカガヤン州ペニャブランカ町", "ja"),
             ("ii", UNKNOWN),
+            ("Guess the language!", "en"),  # Requires PyEnchant.
         ]
 
         for text, name in tests:

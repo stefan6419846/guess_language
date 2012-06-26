@@ -19,6 +19,14 @@ Can’t guess if the text is too short.
 >>> guess_language("Bonjour !") is UNKNOWN
 True
 
+
+But will try harder by checking against installed dictionaries
+if PyEnchant is available.
+
+>>> guess_language("Hello, World!")
+'en'
+
+
 Installation
 ------------
 
@@ -36,6 +44,7 @@ Requirements
 
 - `Python 3.2+ <http://www.python.org>`_
   (or 2.7, using `lib3to2 <https://bitbucket.org/amentajo/lib3to2>`_)
+- `PyEnchant <http://packages.python.org/pyenchant>`_ (optional)
 
 
 This is basically my branch of `guess-language
