@@ -41,7 +41,7 @@ from .data import BLOCKS, BLOCK_RSHIFT
 
 
 __all__ = ["guess_language", "guess_language_tag", "guess_language_name",
-           "guess_language_id", "guess_language_info"]
+           "guess_language_id", "guess_language_info", "UNKNOWN"]
 
 
 MIN_LENGTH = 20

@@ -5,7 +5,7 @@ guess_language – Guess the natural language of a text
 Example usage
 -------------
 
->>> from guess_language import guess_language
+>>> from guess_language import guess_language, UNKNOWN
 >>> guess_language("I’ve been feeling déjà vu all morning.")
 'en'
 >>> guess_language("Tienes que seguir tu corazón.")
@@ -13,6 +13,11 @@ Example usage
 >>> guess_language("いいえ！忍者がいます")
 'ja'
 
+
+Can’t guess if the text is too short.
+
+>>> guess_language("Bonjour !") is UNKNOWN
+True
 
 Installation
 ------------
