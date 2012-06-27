@@ -542,7 +542,7 @@ else:
                         pass
                     else:
                         _enchant_languages = (
-                            [l] +
+                            [_enchant_languages[index]] +
                             _enchant_languages[:index] +
                             _enchant_languages[index+1:]
                         )
