@@ -34,6 +34,7 @@
 
 import re
 import unicodedata
+
 from collections import defaultdict, namedtuple
 from importlib import import_module
 
@@ -42,7 +43,6 @@ from .data import BLOCKS, BLOCK_RSHIFT
 
 __all__ = ["guess_language", "guess_language_tag", "guess_language_name",
            "guess_language_id", "guess_language_info", "UNKNOWN"]
-
 
 MIN_LENGTH = 20
 
@@ -84,8 +84,6 @@ SINGLETONS = [
 ]
 
 PT = ["pt_BR", "pt_PT"]
-
-UNKNOWN = None
 
 NAME_MAP = {
     "ab": "Abkhazian",
@@ -285,16 +283,19 @@ models = {}
 LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 
 
+class Unknown(str):
+    def __bool__(self):
+        return False
+
+
+UNKNOWN = Unknown("UNKNOWN")
+del Unknown
+
+
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    assert isinstance(text, str)
     text = normalize(text)
-
-    # if len(text) < MIN_LENGTH:
-        # text = (text + " ") * (MIN_LENGTH // len(text))
-
-    # Assuming UNKNOWN evaluates to False.
     return _identify(text, find_runs(text)) or _identify_by_spellchecking(text)
 
 
