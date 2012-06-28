@@ -277,7 +277,7 @@ IANA_MAP = {
     "zh_TW": 22,
 }
 
-MODEL_ROOT = __name__ + ".data.models."
+MODEL_ROOT = __package__ + ".data.models."
 models = {}
 
 LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
