@@ -1,5 +1,5 @@
 import sys
-from .guess_language import *
+from .guess_language import guess_language
 
 
 def main():

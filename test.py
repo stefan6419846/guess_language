@@ -21,10 +21,12 @@ import itertools
 import unittest
 import warnings
 
-from guess_language import *
+from guess_language import (
+    guess_language, guess_language_tag, guess_language_name, guess_language_id,
+    guess_language_info, UNKNOWN
+)
 from guess_language.guess_language import (
-    create_ordered_model, find_runs,
-    normalize, UNKNOWN, BLOCKS, BLOCK_RSHIFT,
+    create_ordered_model, find_runs, normalize, BLOCKS, BLOCK_RSHIFT,
     enchant, _identify_by_spellchecking
 )
 
