@@ -499,7 +499,7 @@ except ImportError:
 else:
     import locale
 
-    def _identify_by_spellchecking(text, threshold=0.8, min_words=2,
+    def _identify_by_spellchecking(text, threshold=0.8, min_words=1,
                                    dictionaries={}):
         words = re.findall(r"[\w'’]+", text, re.U)
 

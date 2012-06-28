@@ -14,14 +14,8 @@ Example usage
 'ja'
 
 
-Can’t guess if the text is too short.
-
->>> guess_language("Bonjour !") is UNKNOWN
-True
-
-
-But will try harder by checking against installed spelling dictionaries
-if PyEnchant is available.
+If text is very short and PyEnchant is available,
+check against installed spelling dictionaries.
 
 >>> guess_language("Hello, World!")
 'en'
