@@ -283,13 +283,12 @@ models = {}
 LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 
 
-class Unknown(str):
+class UNKNOWN(str):
     def __bool__(self):
         return False
 
 
-UNKNOWN = Unknown("UNKNOWN")
-del Unknown
+UNKNOWN = UNKNOWN("UNKNOWN")
 
 
 def guess_language(text: str):
