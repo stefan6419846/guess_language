@@ -43,4 +43,4 @@ Requirements
 
 This is basically my branch of `guess-language
 <http://code.google.com/p/guess-language>`_, ported to Python 3
-and optimized for my own needs. Speed has been much improved.
+and optimized for my own needs.
