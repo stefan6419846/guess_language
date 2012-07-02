@@ -9,7 +9,7 @@
 #
 #   Original C++ version for KDE:
 #   Copyright (c) 2006 Jacob R Rideout <kde@jacobrideout.net>
-#   http://websvn.kde.org/branches/work/sonnet-refactoring/common/nlp/guess_language.cpp?view=markup
+#   http://websvn.kde.org/branches/work/sonnet-refactoring/common/nlp/guesslanguage.cpp?view=markup
 #
 #   Original Language::Guess Perl module:
 #   Copyright (c) 2004-2006 Maciej Ceglowski
@@ -174,7 +174,6 @@ NAME_MAP = {
     "ts": "Tsonga",
     "tw": "Twi",
     "uk": "Ukrainian",
-    "uk": "Ukranian",
     "ur": "Urdu",
     "uz": "Uzbek",
     "ve": "Venda",
@@ -269,7 +268,6 @@ IANA_MAP = {
     "tr": 26500,
     "tw": 1499,
     "uk": 26510,
-    "uk": 26520,
     "ur": 26530,
     "uz": 26540,
     "vi": 26550,
@@ -284,6 +282,8 @@ LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 
 
 class UNKNOWN(str):
+    """Unknown language
+    """
     def __bool__(self):
         return False
 
@@ -295,7 +295,7 @@ def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
     text = normalize(text)
-    return _identify(text, find_runs(text)) or _identify_by_spellchecking(text)
+    return identify(text, find_runs(text)) or identify_by_spellchecking(text)
 
 
 def guess_language_info(text: str):
@@ -350,7 +350,7 @@ def find_runs(text):
             run_types[block] += 1
             total_count += 1
 
-#    pprint(run_types)
+    #pprint(run_types)
 
     # return run types that used for 40% or more of the string
     # always return basic latin if found more than 15%
@@ -368,7 +368,9 @@ def find_runs(text):
     return relevant_runs
 
 
-def _identify(sample, scripts):
+def identify(sample, scripts):
+    """Identify the language.
+    """
     # if len(sample) < 3:
         # return UNKNOWN
 
@@ -384,11 +386,11 @@ def _identify(sample, scripts):
 
     if "CJK Unified Ideographs" in scripts or "Bopomofo" in scripts or \
             "Bopomofo Extended" in scripts or "KangXi Radicals" in scripts:
-        return "zh"
-
 # This is in both Ceglowski and Rideout
 # I can't imagine why...
 #            or "Arabic Presentation Forms-A" in scripts
+        return "zh"
+
     if "Cyrillic" in scripts:
         return check(sample, CYRILLIC)
 
@@ -421,6 +423,8 @@ def _identify(sample, scripts):
 
 
 def check(sample, langs):
+    """Check what is the best match.
+    """
     if len(sample) < MIN_LENGTH:
         return UNKNOWN
 
@@ -467,6 +471,8 @@ CONSECUTIVE_SPACES_RE = re.compile(r"\s{2,}", re.U)
 
 
 def distance(model, known_model):
+    """Calculate the distance to the known model.
+    """
     dist = 0
 
     for i, value in enumerate(model[:MAX_GRAMS]):
@@ -478,15 +484,16 @@ def distance(model, known_model):
     return dist
 
 
-def normalize(s):
+def normalize(text):
     """Convert to normalized string.
 
     Remove non-alpha characters and compress runs of spaces.
     """
-    s = unicodedata.normalize("NFC", s)
-    s = "".join(c if c.isalpha() else "'" if c in "'’" else " " for c in s)
-    s = CONSECUTIVE_SPACES_RE.sub(" ", s)
-    return s
+    text = unicodedata.normalize("NFC", text)
+    text = "".join(c if c.isalpha() else "'" if c in "'’" else " "
+                   for c in text)
+    text = CONSECUTIVE_SPACES_RE.sub(" ", text)
+    return text
 
 
 try:
@@ -494,13 +501,18 @@ try:
 except ImportError:
     enchant = None
 
-    def _identify_by_spellchecking(*args):
+    def identify_by_spellchecking(*args, **kwargs):
         return UNKNOWN
 else:
     import locale
 
-    def _identify_by_spellchecking(text, threshold=0.8, min_words=1,
-                                   dictionaries={}):
+    enchant_languages = None
+
+    def identify_by_spellchecking(text, threshold=0.8, min_words=1,
+                                  dictionaries={}):
+        """Identify the language
+           by checking against installed spelling dictionaries.
+        """
         words = re.findall(r"[\w'’]+", text, re.U)
 
         if len(words) < min_words:
@@ -527,27 +539,24 @@ else:
     def list_enchant_languages():
         """Get ordered list of enchant languages.
 
-        locale_language, then en_US, then the rest.
+        locale_language, then "en_US", then the rest.
         """
-        global _enchant_languages
-
-        if "_enchant_languages" not in globals():
-            _enchant_languages = enchant.list_languages()
-
-            for language in ["en_US", get_locale_language()]:
-                for l in [language.split("_")[0], language]:
+        global enchant_languages
+        if enchant_languages is None:
+            enchant_languages = enchant.list_languages()
+            for full_tag in ["en_US", get_locale_language()]:
+                for tag in [full_tag.split("_")[0], full_tag]:
                     try:
-                        index = _enchant_languages.index(l)
+                        index = enchant_languages.index(tag)
                     except ValueError:
                         pass
                     else:
-                        _enchant_languages = (
-                            [_enchant_languages[index]] +
-                            _enchant_languages[:index] +
-                            _enchant_languages[index+1:]
+                        enchant_languages = (
+                            [enchant_languages[index]] +
+                            enchant_languages[:index] +
+                            enchant_languages[index+1:]
                         )
-
-        return _enchant_languages
+        return enchant_languages
 
     def get_locale_language():
         """Get the language code for the current locale setting.
