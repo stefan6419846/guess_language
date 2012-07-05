@@ -490,8 +490,8 @@ def normalize(text):
     Remove non-alpha characters and compress runs of spaces.
     """
     text = unicodedata.normalize("NFC", text)
-    text = "".join(c if c.isalpha() else "'" if c in "'’" else " "
-                   for c in text)
+    text = "".join([c if c.isalpha() else "'" if c in "'’" else " "
+                    for c in text])
     text = CONSECUTIVE_SPACES_RE.sub(" ", text)
     return text
 
