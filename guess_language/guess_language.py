@@ -551,6 +551,7 @@ def decode_text(text, encoding="utf-8"):
 try:
     import enchant
 except ImportError:
+    warnings.warn("PyEnchant is unavailable", ImportWarning)
     enchant = None
 
     def identify_by_spellchecking(*args, **kwargs):
