@@ -34,6 +34,7 @@
 
 import re
 import unicodedata
+import warnings
 
 from collections import defaultdict, namedtuple
 from importlib import import_module
@@ -41,8 +42,14 @@ from importlib import import_module
 from .data import BLOCKS, BLOCK_RSHIFT
 
 
-__all__ = ["guess_language", "guess_language_tag", "guess_language_name",
-           "guess_language_id", "guess_language_info", "UNKNOWN"]
+__all__ = [
+    "guess_language", "guess_language_tag", "guess_language_id",
+    "guess_language_name", "guess_language_info", "UNKNOWN",
+
+    # Deprecated
+    "guessLanguage", "guessLanguageTag", "guessLanguageId",
+    "guessLanguageName", "guessLanguageInfo",
+]
 
 MIN_LENGTH = 20
 
@@ -493,6 +500,39 @@ def normalize(text):
     text = "".join([c if c.isalpha() else "'" if c in "'’" else " "
                     for c in text])
     text = CONSECUTIVE_SPACES_RE.sub(" ", text)
+    return text
+
+
+def guessLanguage(text):
+    warnings.warn("use guess_language() instead", DeprecationWarning, 2)
+    return guess_language(decode_text(text))
+
+
+def guessLanguageTag(text):
+    warnings.warn("use guess_language_tag() instead", DeprecationWarning, 2)
+    return guess_language_tag(decode_text(text))
+
+
+def guessLanguageId(text):
+    warnings.warn("use guess_language_id() instead", DeprecationWarning, 2)
+    return guess_language_id(decode_text(text))
+
+
+def guessLanguageName(text):
+    warnings.warn("use guess_language_name() instead", DeprecationWarning, 2)
+    return guess_language_name(decode_text(text))
+
+
+def guessLanguageInfo(text):
+    warnings.warn("use guess_language_info() instead", DeprecationWarning, 2)
+    return guess_language_info(decode_text(text))
+
+
+def decode_text(text, encoding="utf-8"):
+    if not isinstance(text, str):
+        warnings.warn("passing an encoded string is deprecated",
+                      DeprecationWarning, 3)
+        text = text.decode(encoding)
     return text
 
 
