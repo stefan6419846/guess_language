@@ -1,7 +1,6 @@
 """Command-line script for guess_language
 """
 import argparse
-import locale
 import sys
 
 import guess_language
