@@ -51,6 +51,7 @@ __all__ = [
     "guessLanguageName", "guessLanguageInfo",
 ]
 
+ENCHANT_FIRST = True
 MIN_LENGTH = 20
 
 BASIC_LATIN = [
@@ -419,7 +420,7 @@ def identify(sample, scripts):
     if "Extended Latin" in scripts:
         latin_lang = check(sample, EXTENDED_LATIN)
         if latin_lang == "pt":
-            return check(sample, PT)
+            return check(sample, PT, False)
         else:
             return latin_lang
 
@@ -429,16 +430,16 @@ def identify(sample, scripts):
     return UNKNOWN
 
 
-def check(sample, langs):
+def check(sample, langs, enchant_first=ENCHANT_FIRST):
     """Check what is the best match.
     """
-    tag = check_with_enchant(sample, langs)
-
-    if tag:
-        return tag
-
     if len(sample) < MIN_LENGTH:
-        return UNKNOWN
+        return check_with_enchant(sample, langs)
+
+    if enchant_first:
+        tag = check_with_enchant(sample, langs)
+        if tag:
+            return tag
 
     scores = []
     model = create_ordered_model(sample)  # QMap<int,QString>
@@ -566,55 +567,57 @@ else:
 
     enchant_languages = None
 
-    def check_with_enchant(text, languages, threshold=0.8, min_words=1,
-                           dictionaries={}):
+    def check_with_enchant(text, languages, threshold=0.7,
+                           min_words=1, target_words=200, dictionaries={}):
         """Check against installed spelling dictionaries.
         """
         words = re.findall(r"[\w'’]+", text, re.U)
 
         if len(words) < min_words:
             return UNKNOWN
+        if len(words) >= target_words * 2:
+            words = words[::len(words)//target_words]
 
-        max_score = 0
-        max_tag = get_locale_language()
+        best_score = 0
+        best_tag = None
 
-        for tag in list_enchant_languages():
-            if tag not in languages and tag.split("_")[0] not in languages:
+        for tag in list_core_enchant_languages():
+            if tag not in languages:
                 continue
             try:
                 d = dictionaries[tag]
             except KeyError:
                 d = dictionaries[tag] = enchant.Dict(tag)
             score = sum([1 for w in words if d.check(w)])
-            if score > max_score:
-                max_score = score
-                max_tag = tag
+            if score > best_score:
+                best_score = score
+                best_tag = tag
 
-        if max_score / len(words) < threshold:
+        if best_score / len(words) < threshold:
             return UNKNOWN
 
-        return max_tag if max_tag in NAME_MAP else max_tag.split("_")[0]
+        return best_tag
 
-    def list_enchant_languages():
+    def list_core_enchant_languages():
         """Get ordered list of enchant languages.
 
-        locale_language, then "en_US", then the rest.
+        locale_language, then "en", then the rest.
         """
         global enchant_languages
         if enchant_languages is None:
-            enchant_languages = enchant.list_languages()
-            for full_tag in ["en_US", get_locale_language()]:
-                for tag in [full_tag.split("_")[0], full_tag]:
-                    try:
-                        index = enchant_languages.index(tag)
-                    except ValueError:
-                        pass
-                    else:
-                        enchant_languages = (
-                            [enchant_languages[index]] +
-                            enchant_languages[:index] +
-                            enchant_languages[index+1:]
-                        )
+            enchant_languages = sorted(
+                {l.split("_")[0] for l in enchant.list_languages()})
+            for tag in ["en", get_locale_language().split("_")[0]]:
+                try:
+                    index = enchant_languages.index(tag)
+                except ValueError:
+                    pass
+                else:
+                    enchant_languages = (
+                        [enchant_languages[index]] +
+                        enchant_languages[:index] +
+                        enchant_languages[index+1:]
+                    )
         return enchant_languages
 
     def get_locale_language():

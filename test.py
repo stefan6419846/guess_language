@@ -103,6 +103,7 @@ class GuessLanguageTest(unittest.TestCase):
         ("", UNKNOWN),
     ]
 
+    # Tests that work only when PyEnchant is available.
     enchant_tests = [
         ("Guess the language!", "en"),
         ("Slovenia, Croatia, Bosnia and Herzegovina, Montenegro, Serbia, "

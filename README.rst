@@ -24,7 +24,7 @@ check against installed spelling dictionaries.
 Installation
 ------------
 
-You can use the setup script::
+You can use the ``setup.py`` script::
 
   $ ./setup.py install
 
@@ -41,6 +41,5 @@ Requirements
 - `PyEnchant <http://packages.python.org/pyenchant>`_ (optional)
 
 
-This is basically my branch of `guess-language
-<http://code.google.com/p/guess-language>`_, ported to Python 3
-and optimized for my own needs.
+This is a Python 3 version of `guess-language
+<http://code.google.com/p/guess-language>`_ with further improvements.
