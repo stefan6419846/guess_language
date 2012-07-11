@@ -151,11 +151,14 @@ class GuessLanguageTest(unittest.TestCase):
 
     if enchant:
         def test_guess_enchant(self):
-            languages = set(enchant.list_languages())
-            self.assertNotEqual(len(languages), 0)
+            languages = enchant.list_languages()
 
             for text, name in self.enchant_tests:
-                self.assertEqual(guess_language(text), name)
+                if any(language.startswith(name) for language in languages):
+                    self.assertEqual(guess_language(text), name)
+                else:
+                    warnings.warn("no spelling dictionary for language {!r}"
+                                  .format(name))
     else:
         warnings.warn("PyEnchant is unavailable")
 
