@@ -302,7 +302,7 @@ def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
     text = normalize(text)
-    return identify(text, find_runs(text)) or identify_by_spellchecking(text)
+    return identify(text, find_runs(text))
 
 
 def guess_language_info(text: str):
@@ -432,6 +432,11 @@ def identify(sample, scripts):
 def check(sample, langs):
     """Check what is the best match.
     """
+    tag = check_with_enchant(sample, langs)
+
+    if tag:
+        return tag
+
     if len(sample) < MIN_LENGTH:
         return UNKNOWN
 
@@ -554,17 +559,16 @@ except ImportError:
     warnings.warn("PyEnchant is unavailable", ImportWarning)
     enchant = None
 
-    def identify_by_spellchecking(*args, **kwargs):
+    def check_with_enchant(*args, **kwargs):
         return UNKNOWN
 else:
     import locale
 
     enchant_languages = None
 
-    def identify_by_spellchecking(text, threshold=0.8, min_words=1,
-                                  dictionaries={}):
-        """Identify the language
-           by checking against installed spelling dictionaries.
+    def check_with_enchant(text, languages, threshold=0.8, min_words=1,
+                           dictionaries={}):
+        """Check against installed spelling dictionaries.
         """
         words = re.findall(r"[\w'’]+", text, re.U)
 
@@ -575,6 +579,8 @@ else:
         max_tag = get_locale_language()
 
         for tag in list_enchant_languages():
+            if tag not in languages and tag.split("_")[0] not in languages:
+                continue
             try:
                 d = dictionaries[tag]
             except KeyError:

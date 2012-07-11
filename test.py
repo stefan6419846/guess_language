@@ -26,8 +26,7 @@ from guess_language import (
     guess_language_info, UNKNOWN
 )
 from guess_language.guess_language import (
-    create_ordered_model, find_runs, normalize, BLOCKS, BLOCK_RSHIFT,
-    enchant, identify_by_spellchecking
+    create_ordered_model, find_runs, normalize, BLOCKS, BLOCK_RSHIFT, enchant
 )
 
 
@@ -155,10 +154,6 @@ class GuessLanguageTest(unittest.TestCase):
 
             for text, name in self.enchant_tests:
                 self.assertEqual(guess_language(text), name)
-
-            for text, name in self.tests:
-                if name in languages:
-                    self.assertEqual(identify_by_spellchecking(text), name)
     else:
         warnings.warn("PyEnchant is unavailable")
 
