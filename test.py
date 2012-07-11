@@ -105,6 +105,8 @@ class GuessLanguageTest(unittest.TestCase):
 
     enchant_tests = [
         ("Guess the language!", "en"),
+        ("Slovenia, Croatia, Bosnia and Herzegovina, Montenegro, Serbia, "
+         "Macedonia, Kosovo, Vojvodina", "en"),
     ]
 
     def test_normalize(self):
