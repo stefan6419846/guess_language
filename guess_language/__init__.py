@@ -45,10 +45,6 @@ from .data import BLOCKS, BLOCK_RSHIFT
 __all__ = [
     "guess_language", "guess_language_tag", "guess_language_id",
     "guess_language_name", "guess_language_info", "UNKNOWN",
-
-    # Deprecated
-    "guessLanguage", "guessLanguageTag", "guessLanguageId",
-    "guessLanguageName", "guessLanguageInfo",
 ]
 
 USE_ENCHANT = True
