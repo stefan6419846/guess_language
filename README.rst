@@ -6,19 +6,14 @@ Example usage
 -------------
 
 >>> from guess_language import guess_language
->>> guess_language("I’ve been feeling déjà vu all morning.")
+>>> guess_language("Hello, World!")
 'en'
+>>> guess_language("Ces eaux regorgent de renégats et de voleurs.")
+'fr'
 >>> guess_language("Tienes que seguir tu corazón.")
 'es'
 >>> guess_language("いいえ！忍者がいます")
 'ja'
-
-
-If text is very short and PyEnchant is available,
-check against installed spelling dictionaries.
-
->>> guess_language("Hello, World!")
-'en'
 
 
 Installation
