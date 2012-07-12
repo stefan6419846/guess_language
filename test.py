@@ -112,18 +112,18 @@ class GuessLanguageTest(unittest.TestCase):
 
     def test_find_runs(self):
         self.assertEqual(
-            find_runs("This is a test of the language checker"),
+            find_runs("This is a test of the language checker".split()),
             ["Basic Latin"]
         )
         self.assertEqual(
-            set(find_runs("abcdééé")),
+            set(find_runs("abcdééé".split())),
             set(["Basic Latin", "Extended Latin"])
         )
 
         s = ("Сайлау нәтижесінде дауыстардың басым бөлігін ел премьер "
              "министрі Виктор Янукович пен оның қарсыласы, оппозиция "
              "жетекшісі Виктор Ющенко алды.")
-        self.assertEqual(find_runs(s), ["Cyrillic"])
+        self.assertEqual(find_runs(s.split()), ["Cyrillic"])
 
     def test_create_ordered_model(self):
         self.assertEqual(create_ordered_model("abc"), ["abc"])
