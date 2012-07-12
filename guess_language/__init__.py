@@ -56,6 +56,7 @@ MAX_LENGTH = 4096
 MIN_LENGTH = 20
 MAX_GRAMS = 300
 WORD_RE = re.compile(r"(?:[^\W0-9_]|['’])+", re.U)
+MODEL_ROOT = __package__ + ".data.models."
 
 BASIC_LATIN = [
     "en", "ceb", "ha", "so", "tlh", "id", "haw", "la", "sw", "eu",
@@ -286,7 +287,6 @@ IANA_MAP = {
     "zh_TW": 22,
 }
 
-MODEL_ROOT = __package__ + ".data.models."
 models = {}
 
 LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
@@ -305,7 +305,7 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    words = WORD_RE.findall(text, endpos=MAX_LENGTH)
+    words = WORD_RE.findall(text, 0, min(len(text), MAX_LENGTH))
     return identify(words, find_runs(words))
 
 
