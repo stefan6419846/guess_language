@@ -422,9 +422,12 @@ def identify(words, scripts):
     return UNKNOWN
 
 
-def check(words, langs, use_enchant=USE_ENCHANT):
+def check(words, langs, use_enchant=None):
     """Check what is the best match.
     """
+    if use_enchant is None:
+        use_enchant = USE_ENCHANT
+
     if use_enchant:
         tag = check_with_enchant(words, langs)
         if tag:
