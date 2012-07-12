@@ -51,8 +51,11 @@ __all__ = [
     "guessLanguageName", "guessLanguageInfo",
 ]
 
-ENCHANT_FIRST = True
+USE_ENCHANT = True
+MAX_LENGTH = 4096
 MIN_LENGTH = 20
+MAX_GRAMS = 300
+WORD_RE = re.compile(r"(?:[^\W0-9_]|['’])+", re.U)
 
 BASIC_LATIN = [
     "en", "ceb", "ha", "so", "tlh", "id", "haw", "la", "sw", "eu",
@@ -302,7 +305,8 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    return identify(text, find_runs(text))
+    words = WORD_RE.findall(text, endpos=MAX_LENGTH)
+    return identify(words, find_runs(words))
 
 
 def guess_language_info(text: str):
@@ -340,16 +344,16 @@ def _get_name(iana):
     return NAME_MAP.get(iana, UNKNOWN)
 
 
-def find_runs(text):
+def find_runs(words):
     """Count the number of characters in each character block.
     """
     run_types = defaultdict(int)
 
     total_count = 0
 
-    for c in text:
-        if c.isalpha():
-            block = BLOCKS[ord(c) >> BLOCK_RSHIFT]
+    for word in words:
+        for char in word:
+            block = BLOCKS[ord(char) >> BLOCK_RSHIFT]
             run_types[block] += 1
             total_count += 1
 
@@ -371,12 +375,9 @@ def find_runs(text):
     return relevant_runs
 
 
-def identify(sample, scripts):
+def identify(words, scripts):
     """Identify the language.
     """
-    # if len(sample) < 3:
-        # return UNKNOWN
-
     if "Hangul Syllables" in scripts or "Hangul Jamo" in scripts or \
             "Hangul Compatibility Jamo" in scripts or "Hangul" in scripts:
         return "ko"
@@ -395,14 +396,14 @@ def identify(sample, scripts):
         return "zh"
 
     if "Cyrillic" in scripts:
-        return check(sample, CYRILLIC)
+        return check(words, CYRILLIC)
 
     if "Arabic" in scripts or "Arabic Presentation Forms-A" in scripts or \
             "Arabic Presentation Forms-B" in scripts:
-        return check(sample, ARABIC)
+        return check(words, ARABIC)
 
     if "Devanagari" in scripts:
-        return check(sample, DEVANAGARI)
+        return check(words, DEVANAGARI)
 
     # Try languages with unique scripts
     for block_name, lang_name in SINGLETONS:
@@ -413,28 +414,30 @@ def identify(sample, scripts):
         #return "vi"
 
     if "Extended Latin" in scripts:
-        latin_lang = check(sample, EXTENDED_LATIN)
+        latin_lang = check(words, EXTENDED_LATIN)
         if latin_lang == "pt":
-            return check(sample, PT, False)
+            return check(words, PT, False)
         else:
             return latin_lang
 
     if "Basic Latin" in scripts:
-        return check(sample, ALL_LATIN)
+        return check(words, ALL_LATIN)
 
     return UNKNOWN
 
 
-def check(sample, langs, enchant_first=ENCHANT_FIRST):
+def check(words, langs, use_enchant=USE_ENCHANT):
     """Check what is the best match.
     """
-    if len(sample) < MIN_LENGTH:
-        return check_with_enchant(sample, langs)
-
-    if enchant_first:
-        tag = check_with_enchant(sample, langs)
+    if use_enchant:
+        tag = check_with_enchant(words, langs)
         if tag:
             return tag
+
+    sample = " ".join(words)
+
+    if len(sample) < MIN_LENGTH:
+        return UNKNOWN
 
     scores = []
     model = create_ordered_model(sample)  # QMap<int,QString>
@@ -466,16 +469,12 @@ def create_ordered_model(content):
     """Create a list of trigrams in content sorted by frequency.
     """
     trigrams = defaultdict(int)  # QHash<QString,int>
-    content = normalize(content).lower()
+    content = content.lower().replace("’", "'")
 
     for i in range(len(content) - 2):
         trigrams[content[i:i+3]] += 1
 
     return sorted(trigrams.keys(), key=lambda k: (-trigrams[k], k))
-
-
-MAX_GRAMS = 300
-CONSECUTIVE_SPACES_RE = re.compile(r"\s{2,}", re.U)
 
 
 def distance(model, known_model):
@@ -490,18 +489,6 @@ def distance(model, known_model):
             dist += MAX_GRAMS
 
     return dist
-
-
-def normalize(text):
-    """Convert to normalized string.
-
-    Remove non-alpha characters and compress runs of spaces.
-    """
-    text = unicodedata.normalize("NFC", text)
-    text = "".join([c if c.isalpha() else "'" if c in "'’" else " "
-                    for c in text])
-    text = CONSECUTIVE_SPACES_RE.sub(" ", text)
-    return text
 
 
 def guessLanguage(text):
@@ -562,16 +549,12 @@ else:
 
     enchant_primary_languages = None
 
-    def check_with_enchant(text, languages, threshold=0.7,
-                           min_words=1, target_words=200, dictionaries={}):
+    def check_with_enchant(words, languages, threshold=0.7,
+                           min_words=1, dictionaries={}):
         """Check against installed spelling dictionaries.
         """
-        words = re.findall(r"[\w'’]+", text, re.U)
-
         if len(words) < min_words:
             return UNKNOWN
-        if len(words) >= target_words * 2:
-            words = words[::len(words)//target_words]
 
         best_score = 0
         best_tag = None

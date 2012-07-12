@@ -26,7 +26,7 @@ from guess_language import (
     guess_language_info, UNKNOWN
 )
 from guess_language.guess_language import (
-    create_ordered_model, find_runs, normalize, BLOCKS, BLOCK_RSHIFT, enchant
+    create_ordered_model, find_runs, BLOCKS, BLOCK_RSHIFT, enchant
 )
 
 
@@ -109,13 +109,6 @@ class GuessLanguageTest(unittest.TestCase):
         ("Slovenia, Croatia, Bosnia and Herzegovina, Montenegro, Serbia, "
          "Macedonia, Kosovo, Vojvodina", "en"),
     ]
-
-    def test_normalize(self):
-        self.assertEqual(normalize("abc4def   !@#!#@$   ghi"), "abc def ghi")
-
-        s = ("På denne side bringer vi billeder fra de mange forskellige "
-             "forberedelser til arrangementet efterhånden som vi får dem ")
-        self.assertEqual(normalize(s), s)
 
     def test_find_runs(self):
         self.assertEqual(
