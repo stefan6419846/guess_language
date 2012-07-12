@@ -363,9 +363,9 @@ def find_runs(words):
         pct = value * 100 // total_count
         if pct >= 40:
             relevant_runs.append(key)
-        elif key == "Basic Latin" and pct >= 15:
+        elif pct >= 15 and key == "Basic Latin":
             relevant_runs.append(key)
-        #elif key == "Latin Extended Additional" and pct >= 10:
+        #elif pct >= 10 and key == "Latin Extended Additional":
             #relevant_runs.append(key)
 
     return relevant_runs
@@ -545,8 +545,8 @@ else:
 
     enchant_primary_languages = None
 
-    def check_with_enchant(words, languages, threshold=0.7,
-                           min_words=1, dictionaries={}):
+    def check_with_enchant(words, languages, threshold=0.7, min_words=1,
+                           dictionaries={}):
         """Check against installed spelling dictionaries.
         """
         if len(words) < min_words:
@@ -562,7 +562,7 @@ else:
                 d = dictionaries[tag]
             except KeyError:
                 d = dictionaries[tag] = enchant.Dict(tag)
-            score = sum([1 for w in words if d.check(w)])
+            score = sum([1 for word in words if d.check(word)])
             if score > best_score:
                 best_score = score
                 best_tag = tag
@@ -583,7 +583,7 @@ else:
                 return tag.split("_")[0]
 
             enchant_primary_languages = sorted(
-                {get_primary(l) for l in enchant.list_languages()})
+                {get_primary(tag) for tag in enchant.list_languages()})
             for tag in ["en", get_primary(get_locale_language())]:
                 try:
                     index = enchant_primary_languages.index(tag)
