@@ -302,7 +302,6 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    text = normalize(text)
     return identify(text, find_runs(text))
 
 
@@ -314,9 +313,7 @@ def guess_language_info(text: str):
     if tag is UNKNOWN:
         return LanguageInfo(UNKNOWN, UNKNOWN, UNKNOWN)
 
-    id = _get_id(tag) #@ReservedAssignment
-    name = _get_name(tag)
-    return LanguageInfo(tag, id, name)
+    return LanguageInfo(tag, _get_id(tag), _get_name(tag))
 
 
 # An alias for guess_language
@@ -326,15 +323,13 @@ guess_language_tag = guess_language
 def guess_language_id(text: str):
     """Return the language id, i.e. 26110.
     """
-    lang = guess_language(text)
-    return _get_id(lang)
+    return _get_id(guess_language(text))
 
 
 def guess_language_name(text: str):
     """Return the language name, i.e. 'English'.
     """
-    lang = guess_language(text)
-    return _get_name(lang)
+    return _get_name(guess_language(text))
 
 
 def _get_id(iana):
@@ -471,7 +466,7 @@ def create_ordered_model(content):
     """Create a list of trigrams in content sorted by frequency.
     """
     trigrams = defaultdict(int)  # QHash<QString,int>
-    content = content.lower()
+    content = normalize(content).lower()
 
     for i in range(len(content) - 2):
         trigrams[content[i:i+3]] += 1
@@ -510,35 +505,35 @@ def normalize(text):
 
 
 def guessLanguage(text):
-    """Deprecated function; use guess_language() instead.
+    """Deprecated function - use guess_language() instead.
     """
     warnings.warn(guessLanguage.__doc__.strip(), DeprecationWarning, 2)
     return guess_language(decode_text(text))
 
 
 def guessLanguageTag(text):
-    """Deprecated function; use guess_language_tag() instead.
+    """Deprecated function - use guess_language_tag() instead.
     """
     warnings.warn(guessLanguageTag.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_tag(decode_text(text))
 
 
 def guessLanguageId(text):
-    """Deprecated function; use guess_language_id() instead.
+    """Deprecated function - use guess_language_id() instead.
     """
     warnings.warn(guessLanguageId.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_id(decode_text(text))
 
 
 def guessLanguageName(text):
-    """Deprecated function; use guess_language_name() instead.
+    """Deprecated function - use guess_language_name() instead.
     """
     warnings.warn(guessLanguageName.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_name(decode_text(text))
 
 
 def guessLanguageInfo(text):
-    """Deprecated function; use guess_language_info() instead.
+    """Deprecated function - use guess_language_info() instead.
     """
     warnings.warn(guessLanguageInfo.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_info(decode_text(text))
