@@ -1,7 +1,7 @@
 """Guess the natural language of a text
 """
 #   © 2012 spirit <hiddenspirit@gmail.com>
-#   https://bitbucket.org/spirit/guess_language/
+#   https://bitbucket.org/spirit/guess_language
 #
 #   Original Python package:
 #   Copyright (c) 2008, Kent S Johnson
