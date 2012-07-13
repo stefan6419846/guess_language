@@ -51,7 +51,7 @@ USE_ENCHANT = True
 MAX_LENGTH = 4096
 MIN_LENGTH = 20
 MAX_GRAMS = 300
-WORD_RE = re.compile(r"(?:[^\W0-9_]|['’])+", re.U)
+WORD_RE = re.compile(r"(?:[^\W\d_]|['’])+", re.U)
 MODEL_ROOT = __package__ + ".data.models."
 
 BASIC_LATIN = [
@@ -301,7 +301,7 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    words = WORD_RE.findall(text, 0, min(len(text), MAX_LENGTH))
+    words = WORD_RE.findall(text[:MAX_LENGTH])
     return identify(words, find_runs(words))
 
 

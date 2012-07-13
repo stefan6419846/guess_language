@@ -2,6 +2,7 @@
 """
 
 import argparse
+import os
 import sys
 
 import guess_language
@@ -10,7 +11,8 @@ import guess_language
 def parse_args():
     parser = argparse.ArgumentParser(
         description=__doc__.strip(),
-        prog="{} -m {}".format(sys.executable, "guess_language")
+        prog="{} -m {}".format(os.path.basename(sys.executable),
+                               "guess_language")
     )
     parser.add_argument("--encoding", dest="encoding", help="input encoding")
     parser.add_argument("--no-enchant", dest="use_enchant",
