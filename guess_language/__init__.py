@@ -361,9 +361,7 @@ def find_runs(words):
     relevant_runs = []
     for key, value in run_types.items():
         pct = value * 100 // total_count
-        if pct >= 40:
-            relevant_runs.append(key)
-        elif pct >= 15 and key == "Basic Latin":
+        if pct >= 40 or pct >= 15 and key == "Basic Latin":
             relevant_runs.append(key)
         #elif pct >= 10 and key == "Latin Extended Additional":
             #relevant_runs.append(key)
@@ -374,8 +372,8 @@ def find_runs(words):
 def identify(words, scripts):
     """Identify the language.
     """
-    if "Hangul Syllables" in scripts or "Hangul Jamo" in scripts or \
-            "Hangul Compatibility Jamo" in scripts or "Hangul" in scripts:
+    if ("Hangul Syllables" in scripts or "Hangul Jamo" in scripts or
+            "Hangul Compatibility Jamo" in scripts or "Hangul" in scripts):
         return "ko"
 
     if "Greek and Coptic" in scripts:
@@ -384,8 +382,8 @@ def identify(words, scripts):
     if "Kana" in scripts:
         return "ja"
 
-    if "CJK Unified Ideographs" in scripts or "Bopomofo" in scripts or \
-            "Bopomofo Extended" in scripts or "KangXi Radicals" in scripts:
+    if ("CJK Unified Ideographs" in scripts or "Bopomofo" in scripts or
+            "Bopomofo Extended" in scripts or "KangXi Radicals" in scripts):
 # This is in both Ceglowski and Rideout
 # I can't imagine why...
 #            or "Arabic Presentation Forms-A" in scripts
@@ -394,8 +392,8 @@ def identify(words, scripts):
     if "Cyrillic" in scripts:
         return check(words, CYRILLIC)
 
-    if "Arabic" in scripts or "Arabic Presentation Forms-A" in scripts or \
-            "Arabic Presentation Forms-B" in scripts:
+    if ("Arabic" in scripts or "Arabic Presentation Forms-A" in scripts or
+            "Arabic Presentation Forms-B" in scripts):
         return check(words, ARABIC)
 
     if "Devanagari" in scripts:
