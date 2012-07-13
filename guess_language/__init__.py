@@ -275,7 +275,7 @@ IANA_MAP = {
     "tn": 65578,
     "tr": 26500,
     "tw": 1499,
-    "uk": 26510,
+    "uk": 26520,
     "ur": 26530,
     "uz": 26540,
     "vi": 26550,
@@ -580,12 +580,12 @@ else:
         """
         global enchant_primary_languages
         if enchant_primary_languages is None:
-            def get_primary(tag):
+            def get_language_subtag(tag):
                 return tag.split("_")[0]
 
             enchant_primary_languages = sorted(
-                {get_primary(tag) for tag in enchant.list_languages()})
-            for tag in ["en", get_primary(get_locale_language())]:
+                {get_language_subtag(tag) for tag in enchant.list_languages()})
+            for tag in ["en", get_language_subtag(get_locale_language())]:
                 try:
                     index = enchant_primary_languages.index(tag)
                 except ValueError:
