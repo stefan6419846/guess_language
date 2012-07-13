@@ -1,5 +1,6 @@
-"""Command-line script for guess_language
+"""Guess the natural language of a text
 """
+
 import argparse
 import sys
 
@@ -8,10 +9,12 @@ import guess_language
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description=guess_language.__doc__.strip())
-    parser.add_argument("--encoding", dest="encoding")
+        description=__doc__.strip(),
+        prog="{} -m {}".format(sys.executable, "guess_language")
+    )
+    parser.add_argument("--encoding", dest="encoding", help="input encoding")
     parser.add_argument("--no-enchant", dest="use_enchant",
-                        action="store_false")
+                        action="store_false", help="don't use enchant")
     return parser.parse_args()
 
 
