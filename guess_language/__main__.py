@@ -25,7 +25,9 @@ def main():
     with open(sys.stdin.fileno(), encoding=encoding) as f:
         text = "\n".join(f.readlines())
     guess_language.USE_ENCHANT = args.use_enchant
-    print(guess_language.guess_language(text))
+    tag = guess_language.guess_language(text)
+    print(tag)
+    return 0 if tag else 1
 
 
 if __name__ == "__main__":
