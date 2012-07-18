@@ -23,9 +23,8 @@ You can use the ``setup.py`` script::
 
   $ ./setup.py install
 
-On Windows, you can use one of the MSI binary packages provided
-on the `download page
-<https://bitbucket.org/spirit/guess_language/downloads>`_.
+On Windows, you can use one of the MSI binary packages provided on the
+`download page <https://bitbucket.org/spirit/guess_language/downloads>`_.
 
 
 Requirements
@@ -36,5 +35,6 @@ Requirements
 - `PyEnchant <http://packages.python.org/pyenchant>`_ (optional)
 
 
-This is a Python 3 version of `guess-language
-<http://code.google.com/p/guess-language>`_ with further improvements.
+This is a Python 3 version of
+`guess-language <http://code.google.com/p/guess-language>`_
+with further improvements.
