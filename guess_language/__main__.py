@@ -39,7 +39,7 @@ def main():
         encoding = args.encoding or "utf-8"
 
     with open(file, encoding=encoding) as f:
-        text = "\n".join(f.readlines())
+        text = "".join(f.readlines())
 
     guess_language.USE_ENCHANT = args.use_enchant
     tag = guess_language.guess_language(text)
