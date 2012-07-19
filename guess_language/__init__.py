@@ -32,6 +32,7 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import functools
 import re
 import unicodedata
 import warnings
@@ -488,51 +489,6 @@ def distance(model, known_model):
     return dist
 
 
-def guessLanguage(text):
-    """Deprecated function - use guess_language() instead.
-    """
-    warnings.warn(guessLanguage.__doc__.strip(), DeprecationWarning, 2)
-    return guess_language(decode_text(text))
-
-
-def guessLanguageTag(text):
-    """Deprecated function - use guess_language_tag() instead.
-    """
-    warnings.warn(guessLanguageTag.__doc__.strip(), DeprecationWarning, 2)
-    return guess_language_tag(decode_text(text))
-
-
-def guessLanguageId(text):
-    """Deprecated function - use guess_language_id() instead.
-    """
-    warnings.warn(guessLanguageId.__doc__.strip(), DeprecationWarning, 2)
-    return guess_language_id(decode_text(text))
-
-
-def guessLanguageName(text):
-    """Deprecated function - use guess_language_name() instead.
-    """
-    warnings.warn(guessLanguageName.__doc__.strip(), DeprecationWarning, 2)
-    return guess_language_name(decode_text(text))
-
-
-def guessLanguageInfo(text):
-    """Deprecated function - use guess_language_info() instead.
-    """
-    warnings.warn(guessLanguageInfo.__doc__.strip(), DeprecationWarning, 2)
-    return guess_language_info(decode_text(text))
-
-
-def decode_text(text, encoding="utf-8"):
-    """Decode text if needed (for deprecated functions).
-    """
-    if not isinstance(text, str):
-        warnings.warn("passing an encoded string is deprecated",
-                      DeprecationWarning, 3)
-        text = text.decode(encoding)
-    return text
-
-
 try:
     import enchant
 except ImportError:
@@ -602,3 +558,66 @@ else:
         """Get the language code for the current locale setting.
         """
         return locale.getlocale()[0] or locale.getdefaultlocale()[0]
+
+
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used.
+    """
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        warnings.warn(
+            "call to deprecated function {}()".format(func.__name__),
+            category=DeprecationWarning,
+            stacklevel=2
+        )
+        return func(*args, **kwargs)
+    return new_func
+
+
+@deprecated
+def guessLanguage(text):
+    """Deprecated function - use guess_language() instead.
+    """
+    return guess_language(decode_text(text))
+
+
+@deprecated
+def guessLanguageTag(text):
+    """Deprecated function - use guess_language_tag() instead.
+    """
+    return guess_language_tag(decode_text(text))
+
+
+@deprecated
+def guessLanguageId(text):
+    """Deprecated function - use guess_language_id() instead.
+    """
+    return guess_language_id(decode_text(text))
+
+
+@deprecated
+def guessLanguageName(text):
+    """Deprecated function - use guess_language_name() instead.
+    """
+    warnings.warn(guessLanguageName.__doc__.strip(), DeprecationWarning, 2)
+    return guess_language_name(decode_text(text))
+
+
+@deprecated
+def guessLanguageInfo(text):
+    """Deprecated function - use guess_language_info() instead.
+    """
+    warnings.warn(guessLanguageInfo.__doc__.strip(), DeprecationWarning, 2)
+    return guess_language_info(decode_text(text))
+
+
+def decode_text(text, encoding="utf-8"):
+    """Decode text if needed (for deprecated functions).
+    """
+    if not isinstance(text, str):
+        warnings.warn("passing an encoded string is deprecated",
+                      DeprecationWarning, 3)
+        text = text.decode(encoding)
+    return text
