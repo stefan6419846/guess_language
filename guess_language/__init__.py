@@ -55,19 +55,20 @@ MAX_GRAMS = 300
 WORD_RE = re.compile(r"(?:[^\W\d_]|['’])+", re.U)
 MODEL_ROOT = __package__ + ".data.models."
 
-BASIC_LATIN = [
+BASIC_LATIN = {
     "en", "ceb", "ha", "so", "tlh", "id", "haw", "la", "sw", "eu",
     "nr", "nso", "zu", "xh", "ss", "st", "tn", "ts"
-]
-EXTENDED_LATIN = [
+}
+EXTENDED_LATIN = {
     "cs", "af", "pl", "hr", "ro", "sk", "sl", "tr", "hu", "az",
     "et", "sq", "ca", "es", "fr", "de", "nl", "it", "da", "is", "nb", "sv",
     "fi", "lv", "pt", "ve", "lt", "tl", "cy", "vi"
-]
-ALL_LATIN = BASIC_LATIN + EXTENDED_LATIN
-CYRILLIC = ["ru", "uk", "kk", "uz", "mn", "sr", "mk", "bg", "ky"]
-ARABIC = ["ar", "fa", "ps", "ur"]
-DEVANAGARI = ["hi", "ne"]
+}
+ALL_LATIN = BASIC_LATIN.union(EXTENDED_LATIN)
+CYRILLIC = {"ru", "uk", "kk", "uz", "mn", "sr", "mk", "bg", "ky"}
+ARABIC = {"ar", "fa", "ps", "ur"}
+DEVANAGARI = {"hi", "ne"}
+PT = {"pt_BR", "pt_PT"}
 
 # NOTE mn appears twice, once for mongolian script and once for CYRILLIC
 SINGLETONS = [
@@ -91,8 +92,6 @@ SINGLETONS = [
     ("Mongolian", "mn-Mong"),
     ("Khmer", "km"),
 ]
-
-PT = ["pt_BR", "pt_PT"]
 
 NAME_MAP = {
     "ab": "Abkhazian",
