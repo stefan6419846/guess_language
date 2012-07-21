@@ -499,7 +499,7 @@ except ImportError:
 else:
     import locale
 
-    enchant_primary_languages = None
+    enchant_base_languages = None
 
     def check_with_enchant(words, languages, threshold=0.7, min_words=1,
                            dictionaries={}):
@@ -511,7 +511,7 @@ else:
         best_score = 0
         best_tag = None
 
-        for tag in list_enchant_primary_languages():
+        for tag in list_enchant_base_languages():
             if tag not in languages:
                 continue
             try:
@@ -528,30 +528,30 @@ else:
 
         return best_tag
 
-    def list_enchant_primary_languages():
-        """Get ordered list of enchant primary languages.
+    def list_enchant_base_languages():
+        """Get ordered list of enchant base languages.
 
         locale_language, then "en", then the rest.
         """
-        global enchant_primary_languages
-        if enchant_primary_languages is None:
+        global enchant_base_languages
+        if enchant_base_languages is None:
             def get_language_subtag(tag):
                 return tag.split("_")[0]
 
-            enchant_primary_languages = sorted(
+            enchant_base_languages = sorted(
                 {get_language_subtag(tag) for tag in enchant.list_languages()})
             for tag in ["en", get_language_subtag(get_locale_language())]:
                 try:
-                    index = enchant_primary_languages.index(tag)
+                    index = enchant_base_languages.index(tag)
                 except ValueError:
                     pass
                 else:
-                    enchant_primary_languages = (
-                        [enchant_primary_languages[index]] +
-                        enchant_primary_languages[:index] +
-                        enchant_primary_languages[index+1:]
+                    enchant_base_languages = (
+                        [enchant_base_languages[index]] +
+                        enchant_base_languages[:index] +
+                        enchant_base_languages[index+1:]
                     )
-        return enchant_primary_languages
+        return enchant_base_languages
 
     def get_locale_language():
         """Get the language code for the current locale setting.
