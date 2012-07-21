@@ -302,7 +302,7 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 def guess_language(text: str):
     """Return the language code, i.e. 'en'.
     """
-    words = WORD_RE.findall(text[:MAX_LENGTH])
+    words = WORD_RE.findall(text[:MAX_LENGTH].replace("’", "'"))
     return identify(words, find_runs(words))
 
 
@@ -467,7 +467,7 @@ def create_ordered_model(content):
     """Create a list of trigrams in content sorted by frequency.
     """
     trigrams = defaultdict(int)  # QHash<QString,int>
-    content = content.lower().replace("’", "'")
+    content = content.lower()
 
     for i in range(len(content) - 2):
         trigrams[content[i:i+3]] += 1
