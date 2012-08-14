@@ -17,7 +17,7 @@ def parse_args():
     )
     parser.add_argument("file",
                         help='plain text file or "-" for stdin')
-    parser.add_argument("--encoding",
+    parser.add_argument("-c", "--encoding",
                         help="input encoding")
     parser.add_argument("--disable-enchant", dest="use_enchant",
                         action="store_false",
