@@ -6,7 +6,7 @@ import locale
 import os
 import sys
 
-import guess_language
+import guess_language.console_mode
 
 
 def parse_args():
@@ -16,7 +16,7 @@ def parse_args():
                                "guess_language")
     )
     parser.add_argument("file",
-                        help='plain text file or "-" for stdin')
+                        help="plain text file or “-” for stdin")
     parser.add_argument("-c", "--encoding",
                         help="input encoding")
     parser.add_argument("--disable-enchant", dest="use_enchant",
