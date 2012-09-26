@@ -37,8 +37,7 @@ import re
 import unicodedata
 import warnings
 
-from collections import defaultdict, namedtuple
-from importlib import import_module
+from collections import defaultdict
 
 from .data import BLOCKS, BLOCK_RSHIFT
 
@@ -53,7 +52,7 @@ MAX_LENGTH = 4096
 MIN_LENGTH = 20
 MAX_GRAMS = 300
 WORD_RE = re.compile(r"(?:[^\W\d_]|['’])+", re.U)
-MODEL_ROOT = __package__ + ".data.models."
+MODEL_ROOT = __name__ + ".data.models."
 
 BASIC_LATIN = {
     "en", "ceb", "ha", "so", "tlh", "id", "haw", "la", "sw", "eu",
@@ -285,7 +284,25 @@ IANA_MAP = {
 
 models = {}
 
-LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
+try:
+    from importlib import import_module
+except ImportError:
+    import sys
+
+    def import_module(name):
+        """Import a module.
+        """
+        __import__(name)
+        return sys.modules[name]
+
+try:
+    from collections import namedtuple
+
+    LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
+except ImportError:
+    class LanguageInfo:
+        def __new__(cls, tag, id, name):
+            return tuple((tag, id, name))
 
 
 class UNKNOWN(str):
@@ -567,7 +584,7 @@ def deprecated(func):
     @functools.wraps(func)
     def new_func(*args, **kwargs):
         warnings.warn(
-            "call to deprecated function {}()".format(func.__name__),
+            "call to deprecated function %s()" % func.__name__,
             category=DeprecationWarning,
             stacklevel=2
         )
@@ -617,6 +634,6 @@ def decode_text(text, encoding="utf-8"):
     """
     if not isinstance(text, str):
         warnings.warn("passing an encoded string is deprecated",
-                      DeprecationWarning, 3)
+                      DeprecationWarning, 4)
         text = text.decode(encoding)
     return text
