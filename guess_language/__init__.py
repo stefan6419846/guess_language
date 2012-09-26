@@ -301,10 +301,10 @@ try:
     LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 except ImportError:
     class LanguageInfo(tuple):
-        def __new__(cls, tag, id, name):
+        def __new__(cls, tag, id, name): #@ReservedAssignment
             return tuple.__new__(cls, (tag, id, name))
 
-        def __init__(self, tag, id, name):
+        def __init__(self, tag, id, name): #@ReservedAssignment
             self.tag = tag
             self.id = id
             self.name = name
