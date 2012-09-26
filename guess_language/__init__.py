@@ -300,9 +300,14 @@ try:
 
     LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 except ImportError:
-    class LanguageInfo:
+    class LanguageInfo(tuple):
         def __new__(cls, tag, id, name):
-            return tuple((tag, id, name))
+            return tuple.__new__(cls, (tag, id, name))
+
+        def __init__(self, tag, id, name):
+            self.tag = tag
+            self.id = id
+            self.name = name
 
 
 class UNKNOWN(str):
