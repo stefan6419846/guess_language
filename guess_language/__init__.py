@@ -44,10 +44,9 @@ from .data import BLOCKS, BLOCK_RSHIFT
 
 __all__ = [
     "guess_language", "guess_language_tag", "guess_language_id",
-    "guess_language_name", "guess_language_info", "UNKNOWN",
+    "guess_language_name", "guess_language_info", "UNKNOWN", "use_enchant",
 ]
 
-USE_ENCHANT = True
 MAX_LENGTH = 4096
 MIN_LENGTH = 20
 MAX_GRAMS = 300
@@ -442,17 +441,25 @@ def identify(words, scripts):
     return UNKNOWN
 
 
-def check(words, langs, use_enchant=None):
-    """Check what is the best match.
+def check_with_all(words, langs):
+    """Check what the best match is.
     """
-    if use_enchant is None:
-        use_enchant = USE_ENCHANT
+    return check_with_enchant(words, langs) or check_with_models(words, langs)
 
-    if use_enchant:
-        tag = check_with_enchant(words, langs)
-        if tag:
-            return tag
 
+check = check_with_all
+
+
+def use_enchant(use_enchant=True):
+    """Enable or disable checking with PyEnchant.
+    """
+    global check
+    check = check_with_all if use_enchant else check_with_models
+
+
+def check_with_models(words, langs):
+    """Check against known models.
+    """
     sample = " ".join(words)
 
     if len(sample) < MIN_LENGTH:

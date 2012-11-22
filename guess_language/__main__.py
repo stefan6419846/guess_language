@@ -6,7 +6,7 @@ import locale
 import os
 import sys
 
-import guess_language.console_mode
+import guess_language.console_mode #@UnusedImport
 
 
 def parse_args():
@@ -41,7 +41,8 @@ def main():
     with open(file, encoding=encoding) as f:
         text = "".join(f.readlines())
 
-    guess_language.USE_ENCHANT = args.use_enchant
+    if not args.use_enchant:
+        guess_language.use_enchant(False)
     tag = guess_language.guess_language(text)
     print(tag)
 
