@@ -46,12 +46,13 @@ def download_file(remote, local):
         from urllib2 import urlopen
     from contextlib import closing
 
-    with closing(urlopen(remote)) as inf, open(local, "wb") as ouf:
-        while True:
-            data = inf.read()
-            if not data:
-                break
-            ouf.write(data)
+    with closing(urlopen(remote)) as inf:
+        with open(local, "wb") as ouf:
+            while True:
+                data = inf.read()
+                if not data:
+                    break
+                ouf.write(data)
 
 
 def build_blocks():
