@@ -43,8 +43,7 @@ from .data import BLOCKS, BLOCK_RSHIFT
 
 
 __all__ = [
-    "guess_language", "guess_language_tag", "guess_language_id",
-    "guess_language_name", "guess_language_info", "UNKNOWN", "use_enchant",
+    "guess_language", "use_enchant",
 ]
 
 MAX_LENGTH = 4096
@@ -342,7 +341,7 @@ guess_language_tag = guess_language
 
 
 def guess_language_id(text: str):
-    """Return the language id, i.e. 26110.
+    """Return the language ID, i.e. 26110.
     """
     return _get_id(guess_language(text))
 
@@ -353,12 +352,12 @@ def guess_language_name(text: str):
     return _get_name(guess_language(text))
 
 
-def _get_id(iana):
-    return IANA_MAP.get(iana, UNKNOWN)
+def _get_id(tag):
+    return IANA_MAP.get(tag, UNKNOWN)
 
 
-def _get_name(iana):
-    return NAME_MAP.get(iana, UNKNOWN)
+def _get_name(tag):
+    return NAME_MAP.get(tag, UNKNOWN)
 
 
 def find_runs(words):
@@ -538,7 +537,7 @@ else:
             return UNKNOWN
 
         best_score = 0
-        best_tag = None
+        best_tag = UNKNOWN
 
         for tag in list_enchant_base_languages():
             if tag not in languages:

@@ -14,6 +14,8 @@ Example usage
 'es'
 >>> guess_language("いいえ！忍者がいます")
 'ja'
+>>> not guess_language("??")
+True
 
 
 Installation
