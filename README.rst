@@ -6,8 +6,6 @@ Example usage
 -------------
 
 >>> from guess_language import guess_language
->>> guess_language("Hello, World!")
-'en'
 >>> guess_language("Ces eaux regorgent de renégats et de voleurs.")
 'fr'
 >>> guess_language("Tienes que seguir tu corazón.")
@@ -16,6 +14,14 @@ Example usage
 'ja'
 >>> not guess_language("??")
 True
+
+
+If your text is less than 20 characters long,
+you need `PyEnchant <http://packages.python.org/pyenchant>`_
+and the appropriate dictionaries installed:
+
+>>> guess_language("Hello, World!")
+'en'
 
 
 Installation
@@ -37,9 +43,13 @@ Requirements
 ------------
 
 - `Python 3.2+ <http://www.python.org>`_ (or 2.7)
-- `PyEnchant <http://packages.python.org/pyenchant>`_ (optional)
 - `lib3to2 <https://bitbucket.org/amentajo/lib3to2>`_
   (if installing for Python 2)
+
+
+Optional
+--------
+- `PyEnchant <http://packages.python.org/pyenchant>`_
 
 
 This is a Python 3 version of
