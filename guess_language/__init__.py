@@ -318,17 +318,17 @@ class UNKNOWN(str):
 UNKNOWN = UNKNOWN("UNKNOWN")
 
 
-def guess_language(text: str):
+def guess_language(text: str, hints=None):
     """Return the ISO 639-1 language code.
     """
     words = WORD_RE.findall(text[:MAX_LENGTH].replace("’", "'"))
-    return identify(words, find_runs(words))
+    return identify(words, find_runs(words), hints)
 
 
-def guess_language_info(text: str):
+def guess_language_info(text: str, hints=None):
     """Return LanguageInfo(tag, id, name).
     """
-    tag = guess_language(text)
+    tag = guess_language(text, hints)
 
     if tag is UNKNOWN:
         return LanguageInfo(UNKNOWN, UNKNOWN, UNKNOWN)
@@ -340,16 +340,16 @@ def guess_language_info(text: str):
 guess_language_tag = guess_language
 
 
-def guess_language_id(text: str):
+def guess_language_id(text: str, hints=None):
     """Return the language ID.
     """
-    return _get_id(guess_language(text))
+    return _get_id(guess_language(text, hints))
 
 
-def guess_language_name(text: str):
+def guess_language_name(text: str, hints=None):
     """Return the language name (in English).
     """
-    return _get_name(guess_language(text))
+    return _get_name(guess_language(text, hints))
 
 
 def _get_id(tag):
@@ -389,7 +389,7 @@ def find_runs(words):
     return relevant_runs
 
 
-def identify(words, scripts):
+def identify(words, scripts, hints=None):
     """Identify the language.
     """
     if ("Hangul Syllables" in scripts or "Hangul Jamo" in scripts or
@@ -410,14 +410,14 @@ def identify(words, scripts):
         return "zh"
 
     if "Cyrillic" in scripts:
-        return check(words, CYRILLIC)
+        return check(words, filter_languages(CYRILLIC, hints))
 
     if ("Arabic" in scripts or "Arabic Presentation Forms-A" in scripts or
             "Arabic Presentation Forms-B" in scripts):
-        return check(words, ARABIC)
+        return check(words, filter_languages(ARABIC, hints))
 
     if "Devanagari" in scripts:
-        return check(words, DEVANAGARI)
+        return check(words, filter_languages(DEVANAGARI, hints))
 
     # Try languages with unique scripts
     for block_name, lang_name in SINGLETONS:
@@ -428,22 +428,29 @@ def identify(words, scripts):
         #return "vi"
 
     if "Extended Latin" in scripts:
-        latin_lang = check(words, EXTENDED_LATIN)
+        latin_lang = check(words, filter_languages(EXTENDED_LATIN, hints))
         if latin_lang == "pt":
-            return check(words, PT)
+            return check(words, filter_languages(PT))
         else:
             return latin_lang
 
     if "Basic Latin" in scripts:
-        return check(words, ALL_LATIN)
+        return check(words, filter_languages(ALL_LATIN, hints))
 
     return UNKNOWN
 
 
-def check_with_all(words, langs):
+def filter_languages(languages, hints):
+    """Filter languages.
+    """
+    return languages.intersection(hints) if hints else languages
+
+
+def check_with_all(words, languages):
     """Check what the best match is.
     """
-    return check_with_enchant(words, langs) or check_with_models(words, langs)
+    return (check_with_enchant(words, languages) or
+            check_with_models(words, languages))
 
 
 check = check_with_all
@@ -456,7 +463,7 @@ def use_enchant(use_enchant=True):
     check = check_with_all if use_enchant else check_with_models
 
 
-def check_with_models(words, langs):
+def check_with_models(words, languages):
     """Check against known models.
     """
     sample = " ".join(words)
@@ -467,7 +474,7 @@ def check_with_models(words, langs):
     scores = []
     model = create_ordered_model(sample)  # QMap<int,QString>
 
-    for key in langs:
+    for key in languages:
         lkey = key.lower()
 
         try:
@@ -529,8 +536,8 @@ else:
 
     enchant_base_languages_dict = None
 
-    def check_with_enchant(words, languages, threshold=0.7, min_words=1,
-                           dictionaries={}):
+    def check_with_enchant(words, languages,
+                           threshold=0.7, min_words=1, dictionaries={}):
         """Check against installed spelling dictionaries.
         """
         if len(words) < min_words:

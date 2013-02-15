@@ -105,6 +105,14 @@ class GuessLanguageTest(unittest.TestCase):
         ("", UNKNOWN),
     ]
 
+    # Tests with limited possible languages
+    tests_with_hints = [
+        ('Gemälde "Lady Diana" '
+         'Original Acryl-Gemälde 60 x 80cm auf Leinwand, gerahmt',
+         "de",
+         {"de", "en", "fr", "it"}),
+    ]
+
     # Tests that work only when PyEnchant is available.
     enchant_tests = [
         ("Guess the language!", "en"),
@@ -138,6 +146,9 @@ class GuessLanguageTest(unittest.TestCase):
     def test_guess(self):
         for text, name in self.tests:
             self.assertEqual(guess_language(text), name)
+
+        for text, name, hints in self.tests_with_hints:
+            self.assertEqual(guess_language(text, hints), name)
 
         text = "Vérifions que le détecteur de langue fonctionne."
         self.assertEqual(guess_language_tag(text), "fr")
