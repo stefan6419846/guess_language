@@ -430,7 +430,7 @@ def identify(words, scripts):
     if "Extended Latin" in scripts:
         latin_lang = check(words, EXTENDED_LATIN)
         if latin_lang == "pt":
-            return check(words, PT, False)
+            return check(words, PT)
         else:
             return latin_lang
 

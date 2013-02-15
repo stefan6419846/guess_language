@@ -100,6 +100,8 @@ class GuessLanguageTest(unittest.TestCase):
         ("トヨタ自動車、フィリピンの植林活動で第三者認証取得　"
          "トヨタ自動車(株)（以下、トヨタ）は、2007年９月よりフィリピンのルソン"
          "島北部に位置するカガヤン州ペニャブランカ町", "ja"),
+        ("Portugal é um país soberano unitário localizado "
+         "no Sudoeste da Europa.", "pt"),
         ("", UNKNOWN),
     ]
 
