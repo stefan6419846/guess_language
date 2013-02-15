@@ -37,7 +37,7 @@ import re
 import unicodedata
 import warnings
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from .data import BLOCKS, BLOCK_RSHIFT
 
@@ -527,7 +527,7 @@ except ImportError:
 else:
     import locale
 
-    enchant_base_languages = None
+    enchant_base_languages_dict = None
 
     def check_with_enchant(words, languages, threshold=0.7, min_words=1,
                            dictionaries={}):
@@ -539,13 +539,13 @@ else:
         best_score = 0
         best_tag = UNKNOWN
 
-        for tag in list_enchant_base_languages():
+        for tag, enchant_tag in get_enchant_base_languages_dict().items():
             if tag not in languages:
                 continue
             try:
                 d = dictionaries[tag]
             except KeyError:
-                d = dictionaries[tag] = enchant.Dict(tag)
+                d = dictionaries[tag] = enchant.Dict(enchant_tag)
             score = sum([1 for word in words if d.check(word)])
             if score > best_score:
                 best_score = score
@@ -556,30 +556,41 @@ else:
 
         return best_tag
 
-    def list_enchant_base_languages():
-        """Get ordered list of enchant base languages.
+    def get_enchant_base_languages_dict():
+        """Get ordered dictionary of enchant base languages.
 
         locale_language, then "en", then the rest.
         """
-        global enchant_base_languages
-        if enchant_base_languages is None:
+        global enchant_base_languages_dict
+        if enchant_base_languages_dict is None:
             def get_language_subtag(tag):
                 return tag.split("_")[0]
 
-            enchant_base_languages = sorted(
-                {get_language_subtag(tag) for tag in enchant.list_languages()})
-            for tag in ["en", get_language_subtag(get_locale_language())]:
+            languages = OrderedDict()
+            locale_language = get_locale_language()
+            for tag in sorted(enchant.list_languages()):
+                subtag = get_language_subtag(tag)
+                if tag == locale_language or subtag not in languages:
+                    languages[subtag] = tag
+            languages_keys = list(languages.keys())
+            languages_items = list(languages.items())
+            for tag in ["en", get_language_subtag(locale_language)]:
                 try:
-                    index = enchant_base_languages.index(tag)
+                    index = languages_keys.index(tag)
                 except ValueError:
                     pass
                 else:
-                    enchant_base_languages = (
-                        [enchant_base_languages[index]] +
-                        enchant_base_languages[:index] +
-                        enchant_base_languages[index+1:]
+                    languages_keys = (
+                        [languages_keys[index]] +
+                        languages_keys[:index] + languages_keys[index+1:]
                     )
-        return enchant_base_languages
+                    languages_items = (
+                        [languages_items[index]] +
+                        languages_items[:index] + languages_items[index+1:]
+                    )
+            enchant_base_languages_dict = OrderedDict(languages_items)
+
+        return enchant_base_languages_dict
 
     def get_locale_language():
         """Get the language code for the current locale setting.
