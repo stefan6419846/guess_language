@@ -319,14 +319,14 @@ UNKNOWN = UNKNOWN("UNKNOWN")
 
 
 def guess_language(text: str):
-    """Return the language code, i.e. 'en'.
+    """Return the ISO 639-1 language code.
     """
     words = WORD_RE.findall(text[:MAX_LENGTH].replace("’", "'"))
     return identify(words, find_runs(words))
 
 
 def guess_language_info(text: str):
-    """Return LanguageInfo(tag, id, name), i.e. ('en', 26110, 'English').
+    """Return LanguageInfo(tag, id, name).
     """
     tag = guess_language(text)
 
@@ -341,13 +341,13 @@ guess_language_tag = guess_language
 
 
 def guess_language_id(text: str):
-    """Return the language ID, i.e. 26110.
+    """Return the language ID.
     """
     return _get_id(guess_language(text))
 
 
 def guess_language_name(text: str):
-    """Return the language name, i.e. 'English'.
+    """Return the language name (in English).
     """
     return _get_name(guess_language(text))
 
