@@ -570,33 +570,26 @@ else:
         """
         global enchant_base_languages_dict
         if enchant_base_languages_dict is None:
-            def get_language_subtag(tag):
+            def get_language_sub_tag(tag):
                 return tag.split("_")[0]
-
-            languages = OrderedDict()
-            locale_language = get_locale_language()
-            for tag in sorted(enchant.list_languages()):
-                subtag = get_language_subtag(tag)
-                if tag == locale_language or subtag not in languages:
-                    languages[subtag] = tag
-            languages_keys = list(languages.keys())
-            languages_items = list(languages.items())
-            for tag in ["en", get_language_subtag(locale_language)]:
-                try:
-                    index = languages_keys.index(tag)
-                except ValueError:
-                    pass
-                else:
-                    languages_keys = (
-                        [languages_keys[index]] +
-                        languages_keys[:index] + languages_keys[index+1:]
-                    )
-                    languages_items = (
-                        [languages_items[index]] +
-                        languages_items[:index] + languages_items[index+1:]
-                    )
-            enchant_base_languages_dict = OrderedDict(languages_items)
-
+            enchant_base_languages_dict = OrderedDict()
+            enchant_languages = sorted(enchant.list_languages())
+            for full_tag in [get_locale_language(), "en_US"]:
+                sub_tag = get_language_sub_tag(full_tag)
+                if sub_tag not in enchant_base_languages_dict:
+                    for tag in [full_tag, sub_tag]:
+                        try:
+                            index = enchant_languages.index(tag)
+                        except ValueError:
+                            pass
+                        else:
+                            enchant_base_languages_dict[sub_tag] = tag
+                            del enchant_languages[index]
+                            break
+            for tag in enchant_languages:
+                sub_tag = get_language_sub_tag(tag)
+                if sub_tag not in enchant_base_languages_dict:
+                    enchant_base_languages_dict[sub_tag] = tag
         return enchant_base_languages_dict
 
     def get_locale_language():
