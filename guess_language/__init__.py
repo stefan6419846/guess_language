@@ -56,9 +56,9 @@ BASIC_LATIN = {
     "sw", "tlh", "tn", "ts", "xh", "zu"
 }
 EXTENDED_LATIN = {
-    "af", "az", "ca", "cs", "cy", "da", "de", "es", "et", "fi", "fr", "hr",
-    "hu", "is", "it", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sk", "sl",
-    "sq", "sv", "tl", "tr", "ve", "vi"
+    "af", "az", "ca", "cs", "cy", "da", "de", "eo", "es", "et", "fi", "fr",
+    "hr", "hu", "is", "it", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sk",
+    "sl", "sq", "sv", "tl", "tr", "ve", "vi"
 }
 ALL_LATIN = BASIC_LATIN.union(EXTENDED_LATIN)
 CYRILLIC = {"bg", "kk", "ky", "mk", "mn", "ru", "sr", "uk", "uz"}

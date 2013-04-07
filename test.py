@@ -102,6 +102,7 @@ class GuessLanguageTest(unittest.TestCase):
          "島北部に位置するカガヤン州ペニャブランカ町", "ja"),
         ("Portugal é um país soberano unitário localizado "
          "no Sudoeste da Europa.", "pt"),
+        ("La akcento estas sur la antaŭlasta silabo.", "eo"),
         ("", UNKNOWN),
     ]
 
