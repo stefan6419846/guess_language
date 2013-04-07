@@ -34,7 +34,6 @@
 
 import functools
 import re
-import unicodedata
 import warnings
 
 from collections import defaultdict, OrderedDict
@@ -53,16 +52,16 @@ WORD_RE = re.compile(r"(?:[^\W\d_]|['’])+", re.U)
 MODEL_ROOT = __name__ + ".data.models."
 
 BASIC_LATIN = {
-    "en", "ceb", "ha", "so", "tlh", "id", "haw", "la", "sw", "eu",
-    "nr", "nso", "zu", "xh", "ss", "st", "tn", "ts"
+    "ceb", "en", "eu", "ha", "haw", "id", "la", "nr", "nso", "so", "ss", "st",
+    "sw", "tlh", "tn", "ts", "xh", "zu"
 }
 EXTENDED_LATIN = {
-    "cs", "af", "pl", "hr", "ro", "sk", "sl", "tr", "hu", "az",
-    "et", "sq", "ca", "es", "fr", "de", "nl", "it", "da", "is", "nb", "sv",
-    "fi", "lv", "pt", "ve", "lt", "tl", "cy", "vi"
+    "af", "az", "ca", "cs", "cy", "da", "de", "es", "et", "fi", "fr", "hr",
+    "hu", "is", "it", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sk", "sl",
+    "sq", "sv", "tl", "tr", "ve", "vi"
 }
 ALL_LATIN = BASIC_LATIN.union(EXTENDED_LATIN)
-CYRILLIC = {"ru", "uk", "kk", "uz", "mn", "sr", "mk", "bg", "ky"}
+CYRILLIC = {"bg", "kk", "ky", "mk", "mn", "ru", "sr", "uk", "uz"}
 ARABIC = {"ar", "fa", "ps", "ur"}
 DEVANAGARI = {"hi", "ne"}
 PT = {"pt_BR", "pt_PT"}

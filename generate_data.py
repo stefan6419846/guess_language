@@ -28,6 +28,7 @@ TRIGRAMS_DIR = os.path.join(SCRIPT_DIR, "trigrams")
 BLOCKS_URL = "http://unicode.org/Public/UNIDATA/Blocks.txt"
 BLOCKS_FN = os.path.basename(BLOCKS_URL)
 ENCODING = "utf-8"
+MAX_GRAMS = 300
 
 
 def make_data_dir():
@@ -126,7 +127,7 @@ def build_models():
                     assert not consecutive_spaces_re.search(value)
                     assert n == int(m.group(2))
                     model[value] = n
-            assert len(model) == 300
+            assert len(model) == MAX_GRAMS
 
         path = os.path.join(MODELS_DIR, model_file.lower() + ".py")
 

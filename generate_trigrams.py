@@ -5,15 +5,14 @@ Input may be files extracted with Wikipedia Extractor:
 http://medialab.di.unipi.it/wiki/Wikipedia_Extractor
 """
 
-
 import argparse
 import os
 import re
 import sys
 
 from collections import defaultdict
-
 from guess_language import WORD_RE, MAX_GRAMS
+
 
 TAG_RE = re.compile(r"<.*?>|\{.*?\}|\\\w+")
 
