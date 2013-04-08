@@ -33,19 +33,6 @@ class OrderedModelBuilder:
                       key=lambda k: (-self.trigrams[k], k))[:MAX_GRAMS]
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "txt_dir",
-        help="directory of plain text files"
-    )
-    parser.add_argument(
-        "output",
-        help="output trigrams file"
-    )
-    return parser.parse_args()
-
-
 def parse(builder, path):
     lines = []
     with open(path) as f:
@@ -59,6 +46,19 @@ def parse(builder, path):
                 lines.append(TAG_RE.sub("", line))
     if lines:
         builder.feed(" ".join(lines))
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "txt_dir",
+        help="directory of plain text files"
+    )
+    parser.add_argument(
+        "output",
+        help="output trigrams file"
+    )
+    return parser.parse_args()
 
 
 def main():
