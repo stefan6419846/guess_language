@@ -50,6 +50,7 @@ MIN_LENGTH = 20
 MAX_GRAMS = 300
 WORD_RE = re.compile(r"(?:[^\W\d_]|['’])+", re.U)
 MODEL_ROOT = __name__ + ".data.models."
+FALLBACK_LANGUAGE = "en_US"
 
 BASIC_LATIN = {
     "ceb", "en", "eu", "ha", "haw", "id", "la", "nr", "nso", "so", "ss", "st",
@@ -573,7 +574,7 @@ else:
                 return tag.split("_")[0]
             enchant_base_languages_dict = OrderedDict()
             enchant_languages = sorted(enchant.list_languages())
-            for full_tag in [get_locale_language(), "en_US"]:
+            for full_tag in [get_locale_language(), FALLBACK_LANGUAGE]:
                 sub_tag = get_language_sub_tag(full_tag)
                 if sub_tag not in enchant_base_languages_dict:
                     for tag in [full_tag, sub_tag]:
@@ -594,7 +595,8 @@ else:
     def get_locale_language():
         """Get the language code for the current locale setting.
         """
-        return locale.getlocale()[0] or locale.getdefaultlocale()[0]
+        return (locale.getlocale()[0] or locale.getdefaultlocale()[0] or
+                FALLBACK_LANGUAGE)
 
 
 def deprecated(func):
