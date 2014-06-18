@@ -2,8 +2,8 @@
 """Generate the data subpackage
 """
 
-import codecs
 import os
+import io
 import re
 import shutil
 import sys
@@ -64,7 +64,7 @@ def build_blocks():
 
     splitter = re.compile(r"^([0-9A-F]+)\.\.([0-9A-F]+);\s*(.*)$", re.I)
 
-    with open(BLOCKS_PATH, "a") as f:
+    with open(BLOCKS_PATH, "w", newline="\n") as f:
         f.write("BLOCK_RSHIFT = {!r}\n".format(BLOCK_RSHIFT))
         f.write("BLOCKS = [None] * {:#x}\n".format(
             MAX_BLOCKS + 1 >> BLOCK_RSHIFT))
@@ -119,7 +119,7 @@ def build_models():
 
         model = {}  # QHash<QString,int> model
 
-        with codecs.open(model_path, encoding=ENCODING) as f:
+        with io.open(model_path, encoding=ENCODING) as f:
             for n, line in enumerate(f):
                 m = line_re.match(line)
                 if m:
@@ -131,7 +131,7 @@ def build_models():
 
         path = os.path.join(MODELS_DIR, model_file.lower() + ".py")
 
-        with codecs.open(path, "w", encoding=ENCODING) as f:
+        with io.open(path, "w", encoding=ENCODING, newline="\n") as f:
             f.write("# -*- coding: {} -*-\nmodel = {{\n".format(ENCODING))
             for k, v in sorted(model.items(), key=itemgetter(1)):
                 f.write(" {!r}: {!r},\n".format(k, v))
