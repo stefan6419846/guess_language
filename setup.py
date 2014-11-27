@@ -365,9 +365,10 @@ def run_3to2(args=None):
     try:
         proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
     except OSError:
-        for path in glob.glob("*.egg"):
-            if os.path.isdir(path) and not path in sys.path:
-                sys.path.append(path)
+        for base_dir in [".", ".eggs"]:
+            for path in glob.glob(os.path.join(base_dir, "*.egg")):
+                if os.path.isdir(path) and not path in sys.path:
+                    sys.path.append(path)
         try:
             from lib3to2.main import main as lib3to2_main
         except ImportError:
