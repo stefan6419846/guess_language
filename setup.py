@@ -332,13 +332,17 @@ def cfg_to_args(config):
         opts_to_args["metadata"].append(("requires-dist", "install_requires"))
         if IS_PY2K and not which("3to2"):
             kwargs["setup_requires"] = ["3to2"]
+            kwargs["install_requires"] = ["3to2"]
         kwargs["zip_safe"] = False
 
     for section in opts_to_args:
         for option, argname in opts_to_args[section]:
             value = get_cfg_value(config, section, option)
             if value:
-                kwargs[argname] = value
+                if argname in kwargs:
+                    kwargs[argname] += value
+                else:
+                    kwargs[argname] = value
 
     if "long_description" not in kwargs:
         kwargs["long_description"] = read_description_file(config)
@@ -361,31 +365,33 @@ def cfg_to_args(config):
 def run_3to2(args=None):
     """Convert Python files using lib3to2.
     """
-    args = BASE_ARGS_3TO2 if args is None else BASE_ARGS_3TO2 + args
-    try:
-        proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
-    except OSError:
+    def run_3to2_lib(args):
         for base_dir in [".", ".eggs"]:
             for path in glob.glob(os.path.join(base_dir, "*.egg")):
                 if os.path.isdir(path) and not path in sys.path:
                     sys.path.append(path)
-        try:
-            from lib3to2.main import main as lib3to2_main
-        except ImportError:
-            raise OSError("3to2 script is unavailable.")
-        else:
-            if lib3to2_main("lib3to2.fixes", args):
-                raise Exception("lib3to2 parsing error")
-    else:
-        # HACK: workaround for 3to2 never returning non-zero
-        # when using the -j option.
+        from lib3to2.main import main as lib3to2_main
+        code = lib3to2_main("lib3to2.fixes", args)
+        if code:
+            raise Exception("lib3to2 error:", code)
+
+    def run_3to2_script(args):
+        proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
         num_errors = 0
         while proc.poll() is None:
             line = proc.stderr.readline()
             sys.stderr.write(line)
             num_errors += line.count(": ParseError: ")
-        if proc.returncode or num_errors:
-            raise Exception("lib3to2 parsing error")
+        if proc.returncode:
+            raise Exception("3to2 error:", proc.returncode)
+        if num_errors:
+            raise Exception("3to2 parsing error")
+
+    args = BASE_ARGS_3TO2 if args is None else BASE_ARGS_3TO2 + args
+    try:
+        run_3to2_lib(args)
+    except ImportError:
+        run_3to2_script(args)
 
 
 def write_py2k_header(file_list):
