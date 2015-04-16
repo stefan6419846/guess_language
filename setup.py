@@ -376,7 +376,10 @@ def run_3to2(args=None):
             raise Exception("lib3to2 error:", code)
 
     def run_3to2_script(args):
-        proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
+        try:
+            proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
+        except OSError:
+            raise Exception("3to2 is missing.")
         num_errors = 0
         while proc.poll() is None:
             line = proc.stderr.readline()
