@@ -640,7 +640,6 @@ def guessLanguageId(text):
 def guessLanguageName(text):
     """Deprecated function - use guess_language_name() instead.
     """
-    warnings.warn(guessLanguageName.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_name(decode_text(text))
 
 
@@ -648,7 +647,6 @@ def guessLanguageName(text):
 def guessLanguageInfo(text):
     """Deprecated function - use guess_language_info() instead.
     """
-    warnings.warn(guessLanguageInfo.__doc__.strip(), DeprecationWarning, 2)
     return guess_language_info(decode_text(text))
 
 
