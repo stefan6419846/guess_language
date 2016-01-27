@@ -36,6 +36,7 @@ To install the package for Python 2, use::
   $ python2 setup.py install
 
 To install with pip, use::
+
   $ pip install guess_language-spirit
 
 On Windows, you may use one of the MSI binary packages provided on the
