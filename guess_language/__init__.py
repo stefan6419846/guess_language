@@ -440,7 +440,7 @@ def identify(words, scripts, hints=None):
     return UNKNOWN
 
 
-def filter_languages(languages, hints):
+def filter_languages(languages, hints=None):
     """Filter languages.
     """
     return languages.intersection(hints) if hints else languages
