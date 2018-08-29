@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Test suite for guess_language
 """
 #   © 2012 spirit <hiddenspirit@gmail.com>
@@ -16,6 +17,8 @@
 #
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import unicode_literals
 
 import itertools
 import unittest
@@ -145,9 +148,11 @@ class GuessLanguageTest(unittest.TestCase):
         for text, name in self.tests:
             self.assertEqual(guess_language(text), name)
 
+    def test_guess_with_hints(self):
         for text, name, hints in self.tests_with_hints:
             self.assertEqual(guess_language(text, hints), name)
 
+    def test_guess_tag(self):
         text = "Vérifions que le détecteur de langue fonctionne."
         self.assertEqual(guess_language_tag(text), "fr")
         self.assertEqual(guess_language_name(text), "French")

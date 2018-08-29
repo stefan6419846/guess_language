@@ -1,16 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Backward-compatible setup script
 """
 
 import codecs
-import glob
 import os
 import re
-import shutil
-import subprocess
 import sys
-
-from distutils.version import LooseVersion
 
 try:
     from setuptools import setup
@@ -75,18 +70,11 @@ except ImportError:
         def __len__(self):
             return len(self.sections())
 
-PY2K_DIR = os.path.join("build", "py2k")
 LIB_DIR = os.path.join("build", "lib")
-IS_PY2K = sys.version_info[0] < 3
-
-BASE_ARGS_3TO2 = [
-    "-w", "-n", "--no-diffs",
-]
 
 if os.name in set(["posix"]):
     try:
         from multiprocessing import cpu_count
-        BASE_ARGS_3TO2 += ["-j", str(cpu_count())]
     except (ImportError, NotImplementedError):
         pass
 
@@ -330,9 +318,6 @@ def cfg_to_args(config):
 
     if USING_SETUPTOOLS:
         opts_to_args["metadata"].append(("requires-dist", "install_requires"))
-        if IS_PY2K and not which("3to2"):
-            kwargs["setup_requires"] = ["3to2"]
-            kwargs["install_requires"] = ["3to2"]
         kwargs["zip_safe"] = False
 
     for section in opts_to_args:
@@ -361,206 +346,6 @@ def cfg_to_args(config):
 
     return kwargs
 
-
-def run_3to2(args=None):
-    """Convert Python files using lib3to2.
-    """
-    def run_3to2_lib(args):
-        for base_dir in [".", ".eggs"]:
-            for path in glob.glob(os.path.join(base_dir, "*.egg")):
-                if os.path.isdir(path) and not path in sys.path:
-                    sys.path.append(path)
-        from lib3to2.main import main as lib3to2_main
-        code = lib3to2_main("lib3to2.fixes", args)
-        if code:
-            raise Exception("lib3to2 error:", code)
-
-    def run_3to2_script(args):
-        try:
-            proc = subprocess.Popen(["3to2"] + args, stderr=subprocess.PIPE)
-        except OSError:
-            raise Exception("3to2 is missing.")
-        num_errors = 0
-        while proc.poll() is None:
-            line = proc.stderr.readline()
-            sys.stderr.write(line)
-            num_errors += line.count(": ParseError: ")
-        if proc.returncode:
-            raise Exception("3to2 error:", proc.returncode)
-        if num_errors:
-            raise Exception("3to2 parsing error")
-
-    args = BASE_ARGS_3TO2 if args is None else BASE_ARGS_3TO2 + args
-    try:
-        run_3to2_lib(args)
-    except ImportError:
-        run_3to2_script(args)
-
-
-def write_py2k_header(file_list):
-    """Write Python 2 shebang and add encoding cookie if needed.
-    """
-    if not isinstance(file_list, list):
-        file_list = [file_list]
-
-    python_re = re.compile(br"^(#!.*\bpython)(.*)([\r\n]+)$")
-    coding_re = re.compile(br"coding[:=]\s*([-\w.]+)")
-    new_line_re = re.compile(br"([\r\n]+)$")
-    version_3 = LooseVersion("3")
-
-    for file in file_list:
-        if not os.path.getsize(file):
-            continue
-
-        rewrite_needed = False
-        python_found = False
-        coding_found = False
-        lines = []
-
-        f = open(file, "rb")
-        try:
-            while len(lines) < 2:
-                line = f.readline()
-                match = python_re.match(line)
-                if match:
-                    python_found = True
-                    version = LooseVersion(match.group(2).decode() or "2")
-                    try:
-                        version_test = version >= version_3
-                    except TypeError:
-                        version_test = True
-                    if version_test:
-                        line = python_re.sub(br"\g<1>2\g<3>", line)
-                        rewrite_needed = True
-                elif coding_re.search(line):
-                    coding_found = True
-                lines.append(line)
-            if not coding_found:
-                match = new_line_re.search(lines[0])
-                newline = match.group(1) if match else b"\n"
-                line = b"# -*- coding: utf-8 -*-" + newline
-                lines.insert(1 if python_found else 0, line)
-                rewrite_needed = True
-            if rewrite_needed:
-                lines += f.readlines()
-        finally:
-            f.close()
-
-        if rewrite_needed:
-            f = open(file, "wb")
-            try:
-                f.writelines(lines)
-            finally:
-                f.close()
-
-
-def generate_py2k(config, py2k_dir=PY2K_DIR, run_tests=False):
-    """Generate Python 2 code from Python 3 code.
-    """
-    def copy(src, dst):
-        if (not os.path.isfile(dst) or
-                os.path.getmtime(src) > os.path.getmtime(dst)):
-            shutil.copy(src, dst)
-            return dst
-        return None
-
-    def copy_data(src, dst):
-        if (not os.path.isfile(dst) or
-                os.path.getmtime(src) > os.path.getmtime(dst) or
-                os.path.getsize(src) != os.path.getsize(dst)):
-            shutil.copy(src, dst)
-            return dst
-        return None
-
-    copied_py_files = []
-    test_scripts = []
-
-    if not os.path.isdir(py2k_dir):
-        os.makedirs(py2k_dir)
-
-    packages_root = get_cfg_value(config, "files", "packages_root")
-
-    for name in get_cfg_value(config, "files", "packages"):
-        name = name.replace(".", os.path.sep)
-        py3k_path = os.path.join(packages_root, name)
-        py2k_path = os.path.join(py2k_dir, py3k_path)
-        if not os.path.isdir(py2k_path):
-            os.makedirs(py2k_path)
-        for fn in os.listdir(py3k_path):
-            path = os.path.join(py3k_path, fn)
-            if not os.path.isfile(path):
-                continue
-            if not os.path.splitext(path)[1].lower() == ".py":
-                continue
-            new_path = os.path.join(py2k_path, fn)
-            if copy(path, new_path):
-                copied_py_files.append(new_path)
-
-    for name in get_cfg_value(config, "files", "modules"):
-        name = name.replace(".", os.path.sep) + ".py"
-        py3k_path = os.path.join(packages_root, name)
-        py2k_path = os.path.join(py2k_dir, py3k_path)
-        dirname = os.path.dirname(py2k_path)
-        if not os.path.isdir(dirname):
-            os.makedirs(dirname)
-        if copy(py3k_path, py2k_path):
-            copied_py_files.append(py2k_path)
-
-    for name in get_cfg_value(config, "files", "scripts"):
-        py3k_path = os.path.join(packages_root, name)
-        py2k_path = os.path.join(py2k_dir, py3k_path)
-        dirname = os.path.dirname(py2k_path)
-        if not os.path.isdir(dirname):
-            os.makedirs(dirname)
-        if copy(py3k_path, py2k_path):
-            copied_py_files.append(py2k_path)
-
-    setup_py_path = os.path.abspath(__file__)
-
-    for pattern in get_cfg_value(config, "files", "extra_files"):
-        for path in glob.glob(pattern):
-            if os.path.abspath(path) == setup_py_path:
-                continue
-            py2k_path = os.path.join(py2k_dir, path)
-            py2k_dirname = os.path.dirname(py2k_path)
-            if not os.path.isdir(py2k_dirname):
-                os.makedirs(py2k_dirname)
-            filename = os.path.split(path)[1]
-            ext = os.path.splitext(filename)[1].lower()
-            if ext == ".py":
-                if copy(path, py2k_path):
-                    copied_py_files.append(py2k_path)
-            else:
-                copy_data(path, py2k_path)
-            if (os.access(py2k_path, os.X_OK) and
-                    re.search(r"\btest\b|_test\b|\btest_", filename)):
-                test_scripts.append(py2k_path)
-
-    for package, patterns in get_package_data(
-            get_cfg_value(config, "files", "package_data")).items():
-        for pattern in patterns:
-            py3k_pattern = os.path.join(packages_root, package, pattern)
-            for py3k_path in glob.glob(py3k_pattern):
-                py2k_path = os.path.join(py2k_dir, py3k_path)
-                py2k_dirname = os.path.dirname(py2k_path)
-                if not os.path.isdir(py2k_dirname):
-                    os.makedirs(py2k_dirname)
-                copy_data(py3k_path, py2k_path)
-
-    if copied_py_files:
-        copied_py_files.sort()
-        try:
-            run_3to2(copied_py_files)
-            write_py2k_header(copied_py_files)
-        except:
-            shutil.rmtree(py2k_dir)
-            raise
-
-    if run_tests:
-        for script in test_scripts:
-            subprocess.check_call([script])
-
-
 def load_config(file="setup.cfg"):
     config = RawConfigParser()
     config.optionxform = lambda x: x.lower().replace("_", "-")
@@ -568,39 +353,10 @@ def load_config(file="setup.cfg"):
     return config
 
 
-def run_setup_hooks(config):
-    for hook_name in get_cfg_value(config, "global", "setup_hooks"):
-        module, obj = hook_name.split(".", 1)
-        if module == "setup":
-            func = globals()[obj]
-        else:
-            module = __import__(module, globals(), locals(), [], 0)
-            func = getattr(module, obj)
-        func(config)
-
-
-def default_hook(config):
-    """Default setup hook
-    """
-    if (any(arg.startswith("bdist") for arg in sys.argv) and
-            os.path.isdir(PY2K_DIR) != IS_PY2K and os.path.isdir(LIB_DIR)):
-        shutil.rmtree(LIB_DIR)
-
-    if IS_PY2K and any(arg.startswith("install") or
-                       arg.startswith("build") or
-                       arg.startswith("bdist") or
-                       arg.startswith("develop") for arg in sys.argv):
-        generate_py2k(config)
-        packages_root = get_cfg_value(config, "files", "packages_root")
-        packages_root = os.path.join(PY2K_DIR, packages_root)
-        set_cfg_value(config, "files", "packages_root", packages_root)
-
-
 def main():
     """Running with distutils or setuptools
     """
     config = load_config()
-    run_setup_hooks(config)
     setup(**cfg_to_args(config))
 
 
