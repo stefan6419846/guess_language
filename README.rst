@@ -27,31 +27,19 @@ and the appropriate dictionaries installed:
 Installation
 ------------
 
-To install the package for Python 3, use::
+To install the package, use::
 
-  $ ./setup.py install
-
-To install the package for Python 2, use::
-
-  $ python2 setup.py install
-
-To install with pip, use::
-
-  $ pip install guess_language-spirit
-
-On Windows, you may use one of the MSI binary packages provided on the
-`download page <https://bitbucket.org/spirit/guess_language/downloads>`_.
-
+  $ pip install .
 
 Prerequisites
 -------------
 
-- `Python 3.2+ <http://www.python.org>`_ (or 2.7)
-- `PyEnchant <http://packages.python.org/pyenchant>`_ (optional)
+- `Python 3.9+ <https://www.python.org>`_
+- `PyEnchant <https://pyenchant.github.io/pyenchant/>`_ (optional)
 - `lib3to2 <https://bitbucket.org/amentajo/lib3to2>`_
-  (if installing for Python 2)
 
-
-This is a Python 3 version of
+This is a maintained/modern fork of
+`guess-language-spirit <https://github.com/hiddenspirit/guess_language>`_,
+which itself is a Python 3 version of
 `guess-language <http://code.google.com/p/guess-language>`_
 with further improvements.

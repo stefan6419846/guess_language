@@ -1,0 +1,89 @@
+# Copyright (c) stefan6419846. All rights reserved.
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# See https://www.gnu.org/licenses/lgpl-3.0.html.en for the license text.
+
+[build-system]
+requires = [
+    "setuptools",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guess_language"
+description = "Guess the natural language of a text"
+version = "0.1.0"
+license = {text = "LPGL-3.0-or-later"}
+readme = {file = "README.rst", content-type = "text/rst"}
+authors = [
+    {name = "Kent Johnson", email = "kent3737@gmail.com"},
+    {name = "spirit (Python 3 support)", email = "hiddenspirit@gmail.com"},
+    {name = "stefan6419846"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+keywords = [
+    "guess",
+    "language",
+]
+requires-python = ">=3.9, <4"
+dependencies = [
+]
+
+[project.urls]
+Homepage = "https://github.com/stefan6419846/guess_language"
+# Documentation = "https://license-tools.readthedocs.io/"
+Repository = "https://github.com/stefan6419846/guess_language"
+Issues = "https://github.com/stefan6419846/guess_language/issues"
+# Changelog = "https://github.com/stefan6419846/license_tools/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+enchant = [
+    "pyenchant",
+]
+dev = [
+    "codespell",
+    "coverage",
+    "flake8",
+    "flake8-bugbear",
+    "pep8-naming",
+    "mypy",
+    # Tests
+    "pyenchant",
+]
+docs = [
+    "sphinx",
+    "furo",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "guess_language",
+    "guess_language.*"
+]
+namespaces = false
+
+[tool.codespell]
+check-hidden = true
+skip = "./.git*,./.mypy_cache/*,./venv*,./guess_language/data/models/*"
+
+[tool.coverage.run]
+branch = true
+source = [
+    "guess_language",
+]
+
+[tool.mypy]
+strict = true
+files = "guess_language,tests"

@@ -1,6 +1,9 @@
-# -*- coding: utf-8 -*-
-"""Guess the natural language of a text
 """
+Guess the natural language of a text.
+"""
+#   Copyright (c) 2024 stefan6419846
+#   https://github.com/stefan6419846/guess_language
+#
 #   © 2012 spirit <hiddenspirit@gmail.com>
 #   https://bitbucket.org/spirit/guess_language
 #
@@ -33,19 +36,17 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-
-import functools
 import re
-import warnings
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, namedtuple, OrderedDict
+from importlib import import_module
 
-from .data import BLOCKS, BLOCK_RSHIFT
+from guess_language.data import BLOCKS, BLOCK_RSHIFT
 
 
 __all__ = [
-    "guess_language", "use_enchant",
+    "guess_language",
+    "use_enchant",
 ]
 
 MAX_LENGTH = 4096
@@ -56,13 +57,57 @@ MODEL_ROOT = __name__ + ".data.models."
 FALLBACK_LANGUAGE = "en_US"
 
 BASIC_LATIN = {
-    "ceb", "en", "eu", "ha", "haw", "id", "la", "nr", "nso", "so", "ss", "st",
-    "sw", "tlh", "tn", "ts", "xh", "zu"
+    "ceb",
+    "en",
+    "eu",
+    "ha",
+    "haw",
+    "id",
+    "la",
+    "nr",
+    "nso",
+    "so",
+    "ss",
+    "st",
+    "sw",
+    "tlh",
+    "tn",
+    "ts",
+    "xh",
+    "zu",
 }
 EXTENDED_LATIN = {
-    "af", "az", "ca", "cs", "cy", "da", "de", "eo", "es", "et", "fi", "fr",
-    "hr", "hu", "is", "it", "lt", "lv", "nb", "nl", "pl", "pt", "ro", "sk",
-    "sl", "sq", "sv", "tl", "tr", "ve", "vi"
+    "af",
+    "az",
+    "ca",
+    "cs",
+    "cy",
+    "da",
+    "de",
+    "eo",
+    "es",
+    "et",
+    "fi",
+    "fr",
+    "hr",
+    "hu",
+    "is",
+    "it",
+    "lt",
+    "lv",
+    "nb",
+    "nl",
+    "pl",
+    "pt",
+    "ro",
+    "sk",
+    "sl",
+    "sq",
+    "sv",
+    "tl",
+    "tr",
+    "ve",
+    "vi",
 }
 ALL_LATIN = BASIC_LATIN.union(EXTENDED_LATIN)
 CYRILLIC = {"bg", "kk", "ky", "mk", "mn", "ru", "sr", "uk", "uz"}
@@ -283,56 +328,34 @@ IANA_MAP = {
     "zh_TW": 22,
 }
 
-models = {}
+MODELS = {}
 
-try:
-    from importlib import import_module
-except ImportError:
-    import sys
-
-    def import_module(name):
-        """Import a module.
-        """
-        __import__(name)
-        return sys.modules[name]
-
-try:
-    from collections import namedtuple
-
-    LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
-except ImportError:
-    class LanguageInfo(tuple):
-        def __new__(cls, tag, id, name): #@ReservedAssignment
-            return tuple.__new__(cls, (tag, id, name))
-
-        def __init__(self, tag, id, name): #@ReservedAssignment
-            self.tag = tag
-            self.id = id
-            self.name = name
+LanguageInfo = namedtuple("LanguageInfo", ["tag", "id", "name"])
 
 
 class UNKNOWN(str):
-    """Unknown language
     """
-    def __bool__(self):
-        return False
+    Unknown language
+    """
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
 
 UNKNOWN = UNKNOWN("UNKNOWN")
 
 
-def guess_language(text, hints=None):
-    """Return the ISO 639-1 language code.
+def guess_language(text: str, hints=None):
+    """
+    Return the ISO 639-1 language code.
     """
     words = WORD_RE.findall(text[:MAX_LENGTH].replace("’", "'"))
     return identify(words, find_runs(words), hints)
 
 
 def guess_language_info(text, hints=None):
-    """Return LanguageInfo(tag, id, name).
+    """
+    Return LanguageInfo(tag, id, name).
     """
     tag = guess_language(text, hints)
 
@@ -342,18 +365,16 @@ def guess_language_info(text, hints=None):
     return LanguageInfo(tag, _get_id(tag), _get_name(tag))
 
 
-# An alias for guess_language
-guess_language_tag = guess_language
-
-
 def guess_language_id(text, hints=None):
-    """Return the language ID.
+    """
+    Return the language ID.
     """
     return _get_id(guess_language(text, hints))
 
 
 def guess_language_name(text, hints=None):
-    """Return the language name (in English).
+    """
+    Return the language name (in English).
     """
     return _get_name(guess_language(text, hints))
 
@@ -367,7 +388,8 @@ def _get_name(tag):
 
 
 def find_runs(words):
-    """Count the number of characters in each character block.
+    """
+    Count the number of characters in each character block.
     """
     run_types = defaultdict(int)
 
@@ -379,27 +401,32 @@ def find_runs(words):
             run_types[block] += 1
             total_count += 1
 
-    #pprint(run_types)
+    # pprint(run_types)
 
     # return run types that used for 40% or more of the string
     # return Basic Latin if found more than 15%
-    ## and extended additional latin if over 10% (for Vietnamese)
+    # and extended additional latin if over 10% (for Vietnamese)
     relevant_runs = []
     for key, value in run_types.items():
         pct = value * 100 // total_count
         if pct >= 40 or pct >= 15 and key == "Basic Latin":
             relevant_runs.append(key)
-        #elif pct >= 10 and key == "Latin Extended Additional":
-            #relevant_runs.append(key)
+        # elif pct >= 10 and key == "Latin Extended Additional":
+        # relevant_runs.append(key)
 
     return relevant_runs
 
 
 def identify(words, scripts, hints=None):
-    """Identify the language.
     """
-    if ("Hangul Syllables" in scripts or "Hangul Jamo" in scripts or
-            "Hangul Compatibility Jamo" in scripts or "Hangul" in scripts):
+    Identify the language.
+    """
+    if (
+        "Hangul Syllables" in scripts
+        or "Hangul Jamo" in scripts
+        or "Hangul Compatibility Jamo" in scripts
+        or "Hangul" in scripts
+    ):
         return "ko"
 
     if "Greek and Coptic" in scripts:
@@ -408,69 +435,79 @@ def identify(words, scripts, hints=None):
     if "Kana" in scripts:
         return "ja"
 
-    if ("CJK Unified Ideographs" in scripts or "Bopomofo" in scripts or
-            "Bopomofo Extended" in scripts or "KangXi Radicals" in scripts):
-# This is in both Ceglowski and Rideout
-# I can't imagine why...
-#            or "Arabic Presentation Forms-A" in scripts
+    if (
+        "CJK Unified Ideographs" in scripts
+        or "Bopomofo" in scripts
+        or "Bopomofo Extended" in scripts
+        or "KangXi Radicals" in scripts
+    ):
+        # This is in both Ceglowski and Rideout
+        # I can't imagine why...
+        #            or "Arabic Presentation Forms-A" in scripts
         return "zh"
 
     if "Cyrillic" in scripts:
-        return check(words, filter_languages(CYRILLIC, hints))
+        return CHECK(words, filter_languages(CYRILLIC, hints))
 
-    if ("Arabic" in scripts or "Arabic Presentation Forms-A" in scripts or
-            "Arabic Presentation Forms-B" in scripts):
-        return check(words, filter_languages(ARABIC, hints))
+    if (
+        "Arabic" in scripts
+        or "Arabic Presentation Forms-A" in scripts
+        or "Arabic Presentation Forms-B" in scripts
+    ):
+        return CHECK(words, filter_languages(ARABIC, hints))
 
     if "Devanagari" in scripts:
-        return check(words, filter_languages(DEVANAGARI, hints))
+        return CHECK(words, filter_languages(DEVANAGARI, hints))
 
     # Try languages with unique scripts
     for block_name, lang_name in SINGLETONS:
         if block_name in scripts:
             return lang_name
 
-    #if "Latin Extended Additional" in scripts:
-        #return "vi"
+    # if "Latin Extended Additional" in scripts:
+    # return "vi"
 
     if "Extended Latin" in scripts:
-        latin_lang = check(words, filter_languages(EXTENDED_LATIN, hints))
+        latin_lang = CHECK(words, filter_languages(EXTENDED_LATIN, hints))
         if latin_lang == "pt":
-            return check(words, filter_languages(PT))
+            return CHECK(words, filter_languages(PT))
         else:
             return latin_lang
 
     if "Basic Latin" in scripts:
-        return check(words, filter_languages(ALL_LATIN, hints))
+        return CHECK(words, filter_languages(ALL_LATIN, hints))
 
     return UNKNOWN
 
 
 def filter_languages(languages, hints=None):
-    """Filter languages.
+    """
+    Filter languages.
     """
     return languages.intersection(hints) if hints else languages
 
 
 def check_with_all(words, languages):
-    """Check what the best match is.
     """
-    return (check_with_enchant(words, languages) or
-            check_with_models(words, languages))
-
-
-check = check_with_all
-
-
-def use_enchant(use_enchant=True):
-    """Enable or disable checking with PyEnchant.
+    Check what the best match is.
     """
-    global check
-    check = check_with_all if use_enchant else check_with_models
+    return check_with_enchant(words, languages) or check_with_models(words, languages)
+
+
+CHECK = check_with_all
+
+
+def use_enchant(_use_enchant=True):
+    """
+    Enable or disable checking with PyEnchant.
+    """
+    global CHECK
+    CHECK = check_with_all if _use_enchant else check_with_models
 
 
 def check_with_models(words, languages):
-    """Check against known models.
+    """
+    Check against known models.
     """
     sample = " ".join(words)
 
@@ -484,13 +521,13 @@ def check_with_models(words, languages):
         lkey = key.lower()
 
         try:
-            known_model = models[lkey]
+            known_model = MODELS[lkey]
         except KeyError:
             try:
-                known_model = import_module(MODEL_ROOT + lkey).model
+                known_model = import_module(MODEL_ROOT + lkey).MODEL
             except ImportError:
                 known_model = None
-            models[lkey] = known_model
+            MODELS[lkey] = known_model
 
         if known_model:
             scores.append((distance(model, known_model), key))
@@ -499,24 +536,26 @@ def check_with_models(words, languages):
         return UNKNOWN
 
     # we want the lowest score, less distance = greater chance of match
-    #pprint(sorted(scores))
+    # pprint(sorted(scores))
     return min(scores)[1]
 
 
 def create_ordered_model(content):
-    """Create a list of trigrams in content sorted by frequency.
+    """
+    Create a list of trigrams in content sorted by frequency.
     """
     trigrams = defaultdict(int)  # QHash<QString,int>
     content = content.lower()
 
     for i in range(len(content) - 2):
-        trigrams[content[i:i+3]] += 1
+        trigrams[content[i:i + 3]] += 1
 
     return sorted(trigrams.keys(), key=lambda k: (-trigrams[k], k))
 
 
 def distance(model, known_model):
-    """Calculate the distance to the known model.
+    """
+    Calculate the distance to the known model.
     """
     dist = 0
 
@@ -532,25 +571,28 @@ def distance(model, known_model):
 try:
     import enchant
 except ImportError:
-    warnings.warn("PyEnchant is unavailable", ImportWarning)
     enchant = None
 
     def check_with_enchant(*args, **kwargs):
         return UNKNOWN
+
 else:
     import locale
 
     enchant_base_languages_dict = None
 
-    def check_with_enchant(words, languages,
-                           threshold=0.7, min_words=1, dictionaries={}):
-        """Check against installed spelling dictionaries.
+    def check_with_enchant(
+        words, languages, threshold=0.7, min_words=1, dictionaries=None
+    ):
+        """
+        Check against installed spelling dictionaries.
         """
         if len(words) < min_words:
             return UNKNOWN
 
         best_score = 0
         best_tag = UNKNOWN
+        dictionaries = dictionaries or {}
 
         for tag, enchant_tag in get_enchant_base_languages_dict().items():
             if tag not in languages:
@@ -576,8 +618,10 @@ else:
         """
         global enchant_base_languages_dict
         if enchant_base_languages_dict is None:
+
             def get_language_sub_tag(tag):
                 return tag.split("_")[0]
+
             enchant_base_languages_dict = OrderedDict()
             enchant_languages = sorted(enchant.list_languages())
             for full_tag in [get_locale_language(), FALLBACK_LANGUAGE]:
@@ -599,68 +643,9 @@ else:
         return enchant_base_languages_dict
 
     def get_locale_language():
-        """Get the language code for the current locale setting.
         """
-        return (locale.getlocale()[0] or locale.getdefaultlocale()[0] or
-                FALLBACK_LANGUAGE)
-
-
-def deprecated(func):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used.
-    """
-    @functools.wraps(func)
-    def new_func(*args, **kwargs):
-        warnings.warn(
-            "call to deprecated function %s()" % func.__name__,
-            category=DeprecationWarning,
-            stacklevel=2
+        Get the language code for the current locale setting.
+        """
+        return (
+            locale.getlocale()[0] or locale.getdefaultlocale()[0] or FALLBACK_LANGUAGE
         )
-        return func(*args, **kwargs)
-    return new_func
-
-
-@deprecated
-def guessLanguage(text):
-    """Deprecated function - use guess_language() instead.
-    """
-    return guess_language(decode_text(text))
-
-
-@deprecated
-def guessLanguageTag(text):
-    """Deprecated function - use guess_language_tag() instead.
-    """
-    return guess_language_tag(decode_text(text))
-
-
-@deprecated
-def guessLanguageId(text):
-    """Deprecated function - use guess_language_id() instead.
-    """
-    return guess_language_id(decode_text(text))
-
-
-@deprecated
-def guessLanguageName(text):
-    """Deprecated function - use guess_language_name() instead.
-    """
-    return guess_language_name(decode_text(text))
-
-
-@deprecated
-def guessLanguageInfo(text):
-    """Deprecated function - use guess_language_info() instead.
-    """
-    return guess_language_info(decode_text(text))
-
-
-def decode_text(text, encoding="utf-8"):
-    """Decode text if needed (for deprecated functions).
-    """
-    if not isinstance(text, str):
-        warnings.warn("passing an encoded string is deprecated",
-                      DeprecationWarning, 4)
-        text = text.decode(encoding)
-    return text

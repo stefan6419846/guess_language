@@ -1,13 +1,13 @@
-#!/usr/bin/env python3
-"""Generate the data subpackage
+"""
+Generate the data subpackage
 """
 
-import os
-import io
 import re
 import shutil
 import sys
 from operator import itemgetter
+from pathlib import Path
+
 
 FOLDED_NAMES = {
     "Latin-1 Supplement": "Extended Latin",
@@ -17,34 +17,30 @@ FOLDED_NAMES = {
     "Katakana": "Kana",
     "Katakana Phonetic Extensions": "Kana",
 }
-MAX_BLOCKS = 0x2fa1f
+MAX_BLOCKS = 0x2FA1F
 BLOCK_RSHIFT = 4
 PACKAGE_NAME = "guess_language"
-SCRIPT_DIR = os.path.dirname(__file__)
-DATA_DIR = os.path.join(SCRIPT_DIR, PACKAGE_NAME, "data")
-BLOCKS_PATH = os.path.join(DATA_DIR, "__init__.py")
-MODELS_DIR = os.path.join(DATA_DIR, "models")
-TRIGRAMS_DIR = os.path.join(SCRIPT_DIR, "trigrams")
+SCRIPT_DIR = Path(__file__).parent
+DATA_DIR = Path(SCRIPT_DIR, PACKAGE_NAME, "data")
+BLOCKS_PATH = Path(DATA_DIR, "__init__.py")
+MODELS_DIR = Path(DATA_DIR, "models")
+TRIGRAMS_DIR = Path(SCRIPT_DIR, "trigrams")
 BLOCKS_URL = "http://unicode.org/Public/UNIDATA/Blocks.txt"
-BLOCKS_FN = os.path.basename(BLOCKS_URL)
+BLOCKS_FN = "Blocks.txt"
 ENCODING = "utf-8"
 MAX_GRAMS = 300
 
 
 def make_data_dir():
     for dir_path in [DATA_DIR, MODELS_DIR]:
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        init_path = os.path.join(dir_path, "__init__.py")
-        with open(init_path, "w"):
-            pass
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True)
+        init_path = dir_path / "__init__.py"
+        init_path.touch()
 
 
 def download_file(remote, local):
-    try:
-        from urllib.request import urlopen
-    except ImportError:
-        from urllib2 import urlopen
+    from urllib.request import urlopen
     from contextlib import closing
 
     with closing(urlopen(remote)) as inf:
@@ -57,19 +53,18 @@ def download_file(remote, local):
 
 
 def build_blocks():
-    blocks_path = os.path.join(os.path.dirname(__file__), BLOCKS_FN)
+    blocks_path = SCRIPT_DIR / BLOCKS_FN
 
-    if not os.path.exists(blocks_path):
+    if not blocks_path.exists():
         download_file(BLOCKS_URL, blocks_path)
 
     splitter = re.compile(r"^([0-9A-F]+)\.\.([0-9A-F]+);\s*(.*)$", re.I)
 
-    with open(BLOCKS_PATH, "w", newline="\n") as f:
-        f.write("BLOCK_RSHIFT = {!r}\n".format(BLOCK_RSHIFT))
-        f.write("BLOCKS = [None] * {:#x}\n".format(
-            MAX_BLOCKS + 1 >> BLOCK_RSHIFT))
+    with BLOCKS_PATH.open("w", newline="\n") as f:
+        f.write(f"BLOCK_RSHIFT = {BLOCK_RSHIFT!r}\n")
+        f.write(f"BLOCKS = [None] * {MAX_BLOCKS + 1 >> BLOCK_RSHIFT:#x}\n")
 
-        for line in open(blocks_path):
+        for line in blocks_path.read_text().splitlines():
             if line.startswith("#"):
                 continue
 
@@ -98,8 +93,11 @@ def build_blocks():
                 comment = None
 
             s = "BLOCKS[{:#x}:{:#x}] = [{!r}] * {:#x}{}\n".format(
-                shifted_start, shifted_end, name, shifted_end - shifted_start,
-                "  # " + comment if comment else ""
+                shifted_start,
+                shifted_end,
+                name,
+                shifted_end - shifted_start,
+                "  # " + comment if comment else "",
             )
             f.write(s)
 
@@ -111,15 +109,13 @@ def build_models():
     line_re = re.compile(r"^(.{3})\s+(.*)$")
     consecutive_spaces_re = re.compile(r"\s{2,}", re.U)
 
-    for model_file in sorted(os.listdir(TRIGRAMS_DIR)):
-        model_path = os.path.join(TRIGRAMS_DIR, model_file)
-
-        if os.path.isdir(model_path):
+    for model_path in sorted(TRIGRAMS_DIR.glob("*")):
+        if model_path.is_dir():
             continue
 
         model = {}  # QHash<QString,int> model
 
-        with io.open(model_path, encoding=ENCODING) as f:
+        with model_path.open(encoding=ENCODING) as f:
             for n, line in enumerate(f):
                 m = line_re.match(line)
                 if m:
@@ -129,17 +125,17 @@ def build_models():
                     model[value] = n
             assert len(model) == MAX_GRAMS
 
-        path = os.path.join(MODELS_DIR, model_file.lower() + ".py")
+        path = MODELS_DIR / f"{model_path.name.lower()}.py"
 
-        with io.open(path, "w", encoding=ENCODING, newline="\n") as f:
-            f.write("# -*- coding: {} -*-\nmodel = {{\n".format(ENCODING))
+        with path.open("w", encoding=ENCODING, newline="\n") as f:
+            f.write("MODEL = {{\n")
             for k, v in sorted(model.items(), key=itemgetter(1)):
-                f.write(" {!r}: {!r},\n".format(k, v))
+                f.write(f" {k!r}: {v!r},\n")
             f.write("}\n")
 
 
 def generate_data(overwrite=False):
-    if os.path.isdir(DATA_DIR):
+    if DATA_DIR.is_dir():
         if overwrite:
             shutil.rmtree(DATA_DIR)
         else:
