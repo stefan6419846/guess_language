@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 name = "guess_language"
 description = "Guess the natural language of a text"
 version = "0.1.0"
-license = {text = "LPGL-3.0-or-later"}
+license = "LPGL-3.0-or-later"
 readme = {file = "README.rst", content-type = "text/rst"}
 authors = [
     {name = "Kent Johnson", email = "kent3737@gmail.com"},
@@ -22,7 +22,6 @@ authors = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development",
