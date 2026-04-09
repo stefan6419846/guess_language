@@ -4,7 +4,7 @@
 
 [build-system]
 requires = [
-    "setuptools>=70.1",
+    "setuptools",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 name = "guess_language"
 description = "Guess the natural language of a text"
 version = "0.1.0"
-license = "LPGL-3.0-or-later"
+license = "LGPL-3.0-or-later"
 readme = {file = "README.rst", content-type = "text/rst"}
 authors = [
     {name = "Kent Johnson", email = "kent3737@gmail.com"},
