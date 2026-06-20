@@ -36,7 +36,6 @@ Prerequisites
 
 - `Python 3.9+ <https://www.python.org>`_
 - `PyEnchant <https://pyenchant.github.io/pyenchant/>`_ (optional)
-- `lib3to2 <https://bitbucket.org/amentajo/lib3to2>`_
 
 This is a maintained/modern fork of
 `guess-language-spirit <https://github.com/hiddenspirit/guess_language>`_,
